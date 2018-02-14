@@ -1,0 +1,45 @@
+<!-- To show welcome -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<link rel="import" href="../core/base.html">
+<dom-module id="convospot-bot">
+    <style>
+    :host {
+        position: absolute;
+        left: 50%;
+        margin-left: -27.5px;
+        margin-top: 5px;
+    }
+    
+    .avatar {
+        height: 40px;
+    }
+    
+    .bot-avatar {
+        height: 40px;
+    }
+    </style>
+    <template>
+        <div class="bot-avatar">
+            <img class="avatar" src="../../images/bot.png" alt="a small bot avatar"></img>
+        </div>
+    </template>
+</dom-module>
+<script>
+(function() {
+    'use strict';
+    Polymer({
+        is: 'convospot-bot',
+        behaviors: [Spinel.Base],
+        listeners: {},
+        properties: {
+            emotion: {
+                type: String,
+                notify: true,
+                value: 'happy'
+            }
+        }
+    });
+})();
+</script>

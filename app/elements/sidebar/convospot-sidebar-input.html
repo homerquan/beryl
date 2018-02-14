@@ -1,0 +1,149 @@
+<!-- Input component -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icons/hardware-icons.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<link rel="import" href="../core/base.html">
+<link rel="import" href="../services/blueprint.html">
+<dom-module id="convospot-sidebar-input">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <style>
+    .message-input {
+        width: 100%;
+        margin: 0;
+        height: 80px;
+        padding: 10px;
+        box-shadow: none;
+        color: var(--default-primary-color) !important;
+        background: white;
+        text-transform: initial;
+        font-size: 14px;
+    }
+
+    .left {
+        position: absolute;
+        left: 20px;
+    }
+
+    .close {
+        position: absolute;
+        bottom: 0;
+    }
+
+    .send {
+        position: absolute;
+        top: 15px;
+        right: 0;
+        z-index: +1;
+    }
+
+    .input-container {
+        position: absolute;
+        background: white;
+        width: 100%;
+        min-height: 80px;
+        bottom: 0;
+    }
+
+    .input-area {
+        padding: 0 10px;
+        margin-right: 40px;
+        margin-bottom: 10px;
+    }
+
+    paper-textarea /deep/ .underline {
+        display: none;
+    }
+
+    paper-textarea /deep/ paper-input-char-counter {
+        position: absolute;
+        right: -10px;
+        top: 6px;
+        font-size: 10px;
+        font-weight: bold;
+        color: var(--convospot-input-color);
+    }
+    </style>
+    <template>
+        <iron-a11y-keys target="[[input]]" keys="shift+enter" on-keys-pressed="_send"></iron-a11y-keys>
+        <paper-button toggles raised class="message-input borderless" on-tap="_openInput">
+            <iron-icon class="left" icon="hardware:keyboard"></iron-icon> <span>Click to input message</span>
+        </paper-button>
+        <div class$="input-container show-{{opened}} animated slideInUp">
+            <div class="input-control">
+                <paper-icon-button icon="hardware:keyboard-hide" on-tap="_closeInput" class="close x-small"></paper-icon-button>
+                <paper-icon-button id="sendButton" icon="icons:send" on-tap="_send" class="send small"></paper-icon-button>
+            </div>
+            <div class="relative-helper">
+                <paper-tooltip for="sendButton" position="top">Shortcut "shift+enter"</paper-tooltip>
+                <paper-textarea id="messageInput" class="input-area" rows="2" max-rows="2" value="{{message}}" placeholder="Type your message" disabled$="{{!connected}}" no-label-float="true" autofocus focused char-counter maxlength="128"></paper-textarea>
+            </div>
+        </div>
+    </template>
+</dom-module>
+<script>
+(function() {
+    'use strict';
+    Polymer({
+        is: 'convospot-sidebar-input',
+        behaviors: [Spinel.Base, Spinel.Services.blueprint],
+        listeners: {},
+        properties: {
+            message: {
+                type: String,
+                value: '',
+                notify: true
+            },
+            opened: {
+                type: Boolean,
+                value: false,
+                notify: true
+            },
+            connected: {
+                type: Boolean,
+                value: false,
+                notify: true
+            },
+            input: {
+                type: Object,
+                value: function() {
+                    return this.$.messageInput;
+                }
+            }
+        },
+        _openInput: function() {
+            this.opened = true;
+            this.$.messageInput.focus();
+        },
+        _closeInput: function() {
+            this.opened = false;
+        },
+        _send: function(e) {
+            e.preventDefault();
+            var text = this.message.trim();
+            if (text) {
+                let msg = {
+                    type: 'language',
+                    text: text,
+                    source : 'visitor',
+                    sourceId : this.visitor.id,
+                    conversation : this.convo.id
+                };
+                this.create('messages', msg, this.jwtToken).then(function(resp) {
+                    if (this.checkResp(resp)) {
+                        this.fire('message-send', resp.data);
+                        _.defer(function() {
+                            this.message = null;
+                        }.bind(this));
+                    }
+                }.bind(this));
+            }
+        }
+    });
+})();
+</script>

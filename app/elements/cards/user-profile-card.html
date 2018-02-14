@@ -1,0 +1,139 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/gold-email-input/gold-email-input.html">
+<link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../core/config.html">
+<link rel="import" href="../core/ajax.html">
+<link rel="import" href="../mixins/notify.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<dom-module id="user-profile-card">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <template>
+        <template is="dom-if" if="{{show}}">
+            <paper-card>
+                <template is="dom-if" if="{{!inputMode}}">
+                    <div class="card-content">
+                        Provide your name and email will help us to reach you later, do you want to leave them to us?
+                    </div>
+                    <div class="card-actions">
+                        <paper-button on-tap="_accept" class="primary small">Yes</paper-button>
+                        <paper-button on-tap="_ignore" class="primary small">Ignore</paper-button>
+                    </div>
+                </template>
+                <div class$="show-{{inputMode}}">
+                    <div class="card-content">
+                        <paper-input required value="{{userName}}" label="Name" pattern="[a-zA-Z]*" error-message="letters only!"></paper-input>
+                        <gold-email-input required auto-validate error-message="Please enter a valid email" label="Email" value="{{email}}"></gold-email-input>
+                    </div>
+                    <div class="card-actions">
+                        <paper-button on-tap="_save" class="primary small">Save</paper-button>
+                        <paper-button on-tap="_close" class="primary small">Close</paper-button>
+                    </div>
+                </div>
+            </paper-card>
+        </template>
+    </template>
+</dom-module>
+<script>
+(function() {
+    'use strict';
+    Polymer({
+        is: 'user-profile-card',
+        behaviors: [Spinel.Ajax, Spinel.Cache, Spinel.Config, Spinel.Notify],
+        listeners: {},
+        properties: {
+            data: {
+                type: Object,
+                notify: true
+            },
+            inputMode: {
+                type: Boolean,
+                notify: true,
+                value: false
+            },
+            userName: {
+                type: String,
+                value: '',
+                notify: true
+            },
+            email: {
+                type: String,
+                value: '',
+                notify: true
+            },
+            context: {
+                type: Object,
+                notify: true
+            },
+            show: {
+                type: Boolean,
+                computed: '_getShow(context.cid)'
+            }
+        },
+        _accept: function() {
+            this.inputMode = true;
+        },
+        _ignore: function() {
+            this.remove();
+            // seperate actual action from FE
+            // send action to be and let BE handle actual updates
+            // var body = {
+            //     context: {
+            //         ignoreProfile: true
+            //     }
+            // };
+            // if (this.context && this.context.cid) {
+            //     this.go(this.apiUrl + '/conversations/' + this.context.cid,
+            //             'PATCH',
+            //             body,
+            //             null,
+            //             'application/json')
+            //         .then(this._postResponse.bind(this))
+            //         .catch(this._postError.bind(this));
+            // }
+        },
+        _getShow: function(cid) {
+            var ignore = this.getItem(cid + ':profile');
+            return !ignore;
+        },
+        _save: function() {
+            this.remove();
+            // seperate actual action from FE
+            // send action to be and let BE handle actual updates
+            var body = {
+                name: this.userName,
+                email: this.email
+            };
+            this.setItem(this.context.cid + ':profile', body);
+            if (this.context && this.context.cid) {
+                //TODO, send to an event receiver and let it update conversation and message (e.g., update acted to true)
+                this.go(this.apiUrl + '/conversations/' + this.context.cid,
+                        'PATCH',
+                        body,
+                        null,
+                        'application/json')
+                    .then(this._postResponse.bind(this))
+                    .catch(this._postError.bind(this));
+            }
+        },
+        _close: function() {
+            this.data = null;
+            this.remove();
+        },
+        /**
+         * Handles the POST response, stores the cid.
+         */
+        _postResponse: function(data) {
+            console.log('success');
+            this.sendNotice('Your contact has saved.');
+        },
+        _postError: function(err) {
+            console.log('error');
+        },
+    });
+})();
+</script>

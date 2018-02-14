@@ -1,0 +1,59 @@
+<!-- A global session -->
+<link rel="import" href="./base.html">
+<link rel="import" href="./constant.html">
+<link rel="import" href="../services/session.html">
+<script>
+(function() {
+    // defaults
+    Polymer({
+        is: 'convospot-session',
+        behaviors: [Spinel.Base, Spinel],
+        properties: {
+            jwtToken: {
+                type: String,
+                value: '',
+                notify: true
+            },
+            hasAuth: {
+                type: Boolean,
+                notify: true,
+                value: false
+            }
+        },
+        ready: function() {
+            //var token = Spinel.Cache.getItem(this.cid + ':convo-token');
+            var token = '';
+            if (!token) {
+                this.hasAuth = false;
+            } else {
+                this.hasAuth = true;
+            }
+        },
+        auth: function() {
+            var that = this;
+            // Login by bot id and token to identify unique user
+            // This jwt token only used once for create conversation
+            // Then using replaceJwtToken to get conversation assoicated token
+            return this.Services.session.login(this.bid, this.token).then(resp => {
+                if (that.checkResp(resp)) {
+                    Spinel.Cache.setItem(that.bid + ':bot-token', resp.data.token);
+                    Spinel.Cache.setItem(that.bid + ':bot', resp.data.entity);
+                    this.jwtToken = resp.data.token;
+                    PubSub.publish(Spinel.Constant.AUTH_SUCCESS);
+                }
+            });
+        },
+        replaceJwtToken: function() {
+            var that = this;
+            return this.Services.session.replaceJwtToken(this.convo, this.jwtToken).then(resp => {
+                if (this.checkResp(resp)) {
+                    this.jwtToken = resp.data.token; //overwrite bot jwt for safty
+                    Spinel.Cache.setItem(this.cid + ':convo-token', resp.data.token);
+                    this.hasAuth = true;
+                    PubSub.publish(Spinel.Constant.JWT_TOKEN_REPLACE_SUCCESS, resp.data.token);
+                }
+            })
+        }
+    });
+})();
+</script>

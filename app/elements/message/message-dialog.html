@@ -1,0 +1,126 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/gold-email-input/gold-email-input.html">
+<link rel="import" href="../../bower_components/file-upload/file-upload.html">
+<link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../core/config.html">
+<link rel="import" href="../core/ajax.html">
+<link rel="import" href="../mixins/notify.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<dom-module id="message-dialog">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <style>
+    paper-dialog-scrollable {
+        min-width: 400px;
+    }
+    
+    </style>
+    <template>
+        <paper-dialog id="message">
+            <h2>Send a message</h2>
+            <paper-dialog-scrollable>
+                <gold-email-input required auto-validate error-message="Please enter a valid email" label="Your Email" value="{{email}}"></gold-email-input>
+                <paper-input required value="{{title}}" label="Subject" error-message="letters only!"></paper-input>
+                <paper-textarea label="Message" value="{{body}}"></paper-textarea>
+                <!-- <wysiwyg-e class="flex" hide-settings="true" value="{{body}}">
+                    <wysiwyg-tool-bold class="wysiwyg-tool"></wysiwyg-tool-bold>
+                    <wysiwyg-tool-italic class="wysiwyg-tool"></wysiwyg-tool-italic>
+                    <wysiwyg-tool-underline class="wysiwyg-tool"></wysiwyg-tool-underline>
+                    <wysiwyg-tool-clear class="wysiwyg-tool"></wysiwyg-tool-clear>
+                    <wysiwyg-tool-link class="wysiwyg-tool"></wysiwyg-tool-link>
+                    <wysiwyg-tool-ordered class="wysiwyg-tool"></wysiwyg-tool-ordered>
+                    <wysiwyg-tool-unordered class="wysiwyg-tool"></wysiwyg-tool-unordered>
+                    <wysiwyg-tool-undo class="wysiwyg-tool"></wysiwyg-tool-undo>
+                    <wysiwyg-tool-redo class="wysiwyg-tool"></wysiwyg-tool-redo>
+                </wysiwyg-e> -->
+                <file-upload target="/path/to/destination">Attach files</file-upload>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss class="small">Cancel</paper-button>
+                <paper-button dialog-confirm class="primary small" on-tap="_send" autofocus>Send</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+</dom-module>
+<script>
+(function() {
+    'use strict';
+    Polymer({
+        is: 'message-dialog',
+        behaviors: [Spinel.Ajax, Spinel.Cache, Spinel.Config, Spinel.Notify],
+        listeners: {},
+        properties: {
+            message: {
+                type: Object,
+                value: {}
+            },
+            show: {
+                type: Boolean,
+                value: true
+            },
+            body: {
+                type: String,
+                value: ''
+            },
+            title: {
+                type: String,
+                value: ''
+            },
+            cid: {
+                type: String,
+                value: ''
+            },
+            email: {
+                type: String,
+                value: ''
+            }
+        },
+        open: function() {
+            var profile = this.getItem(this.cid + ':profile');
+            if (!this.email) {
+                this.email = profile ? profile.email || '' : '';
+            }
+            if (!this.body) {
+                this.body = '';
+            }
+            this.$.message.open();
+        },
+        _send: function() {
+            var data = {
+                title: this.title,
+                body: this.body.replace( /\n/g, '<br \\>' ),
+                fromEmail: this.email,
+                conversation: this.cid
+            };
+            this.go(this.apiUrl + '/posts',
+                    'POST',
+                    data,
+                    null,
+                    'application/json')
+                .then(this._postResponse.bind(this))
+                .catch(this._postError.bind(this));
+
+        },
+        /**
+         * Handles the POST response, stores the convoId.
+         */
+        _postResponse: function(data) {
+            console.log(data);
+            this.sendNotice('Your message has sent successfully.');
+            this.title='';
+            this.body='';
+        },
+        /**
+         * Handles the POST error.
+         */
+        _postError: function(err) {
+            console.error(err);
+        },
+    });
+})();
+</script>

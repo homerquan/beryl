@@ -1,0 +1,70 @@
+<!-- this is the entry point for selected card -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="./user-profile-card.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<dom-module id="convospot-action-card">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <style>
+    :host /deep/ paper-card {
+        width: 100%;
+        margin: 5px 0px;
+    }
+    
+    :host /deep/ paper-card .card-content {
+        color: grey;
+    }
+    :host /deep/ paper-card {
+        margin: 8px;
+        width: calc(100% - 16px);
+    }
+    </style>
+    <template>
+        <template is="dom-if" if="{{_isType(item,'no_user_name')}}">
+            <template is="dom-if" if="{{show}}">
+                <user-profile-card context="[[context]]"></user-profile-card>
+            </template>
+        </template>
+    </template>
+</dom-module>
+<script>
+(function() {
+    'use strict';
+    Polymer({
+        is: 'convospot-action-card',
+        behaviors: [],
+        listeners: {},
+        properties: {
+            cid: {
+                type: String,
+                notify: true
+            },
+            item: {
+                type: Object,
+                notify: true
+            },
+            context: {
+                type: Object,
+                computed: '_getContext(cid,item)'
+            },
+            show: {
+                type: Boolean,
+                computed: '_getShow(item)'
+            }
+        },
+        _isType: function(item, type) {
+            return item.data.action === type;
+        },
+        _getShow: function(item) {
+            return !item.acted;
+        },
+        _getContext: function(cid,item) {
+            return {
+                cid: cid,
+                item: item
+            };
+        }
+    });
+})();
+</script>

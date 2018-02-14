@@ -1,0 +1,303 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<dom-module id="socket-io">
+    <template>
+    </template>
+    <script>
+    (function() {
+        'use strict';
+        Polymer({
+            is: 'socket-io',
+            properties: {
+                socketUrl: {
+                    type: String,
+                    notify: true,
+                    value: ''
+                },
+                socketVersion: {
+                    type: String,
+                    notify: true,
+                    value: '1.3.6'
+                },
+                socketPath: {
+                    type: String,
+                    notify: true,
+                    value: '/socket.io'
+                },
+                socketQuery: {
+                    type: String,
+                    notify: true,
+                    value: '',
+                    observer: 'queryChanged'
+                },
+                namespace: {
+                    type: String,
+                    notify: true,
+                    value: "/"
+                },
+                autoConnect: {
+                    type: Boolean,
+                    notify: true,
+                    value: false,
+                    observer: 'autoConnectChanged'
+                },
+                autoReConnect: {
+                    type: Boolean,
+                    notify: true,
+                    value: true
+                },
+                connected: {
+                    type: Boolean,
+                    notify: true,
+                    value: false
+                },
+                listenTo: {
+                    type: Array,
+                    notify: true,
+                    value: [],
+                    observer: 'listenToChanged'
+                },
+                outEventName: {
+                    type: String,
+                    notify: true,
+                    value: "message"
+                },
+                inMessage: {
+                    type: Object,
+                    notify: true,
+                    value: null
+                },
+                outEventName: {
+                    type: Object,
+                    notify: true,
+                    value: null
+                },
+                reconectionDelay:{
+                    type: Number,
+                    notify: true,
+                    value: 2000
+                },
+                reconnectionAttempts:{
+                    type: Number,
+                    notify: true,
+                    value: 3
+                },
+                currentAttempt:{
+                    type: Number,
+                    value: 0
+                },
+                showToast: {
+                    type: Boolean,
+                    notify: true,
+                    value: false
+                }
+            },
+
+            _connected: false,
+
+            init: function() {
+                if (window.io == undefined) throw new Error("Could not import socket.io library");
+
+                var manager = this.manager = io.Manager(this.socketUrl, {
+                    autoConnect: this.autoConnect,
+                    reconnection: this.autoReConnect,
+                    reconectionDelay: this.reconectionDelay,
+                    reconnectionAttempts: this.reconnectionAttempts,
+                    path: this.socketPath,
+                    query: this.socketQuery
+                });
+                this.ws = manager.socket(this.namespace);
+
+                manager.on('open', this.onConnect.bind(this));
+                manager.on('close', this.onDisconnect.bind(this));
+
+                manager.on('error', this.onError.bind(this));
+                manager.on('connect_failed', this.onError.bind(this));
+                manager.on('connect_timeout', this.onError.bind(this));
+                manager.on('reconnect_attempt', this.onReconnectAttempt.bind(this));
+                manager.on('reconnect_attempt', this.onReconnectAttempt.bind(this));
+                manager.on('reconnecting', this.onReconnecting.bind(this));
+                manager.on('reconnect_error', this.onReconnectFailed.bind(this));
+            },
+
+            ready: function() {
+                window.onbeforeunload = this.beforeUnload.bind(this);
+                var script = document.createElement('script');
+                script.setAttribute("type","text/javascript");
+                script.setAttribute("async","false");
+               // Handle Script loading
+                var done = false;
+                var _this = this;
+                // Attach handlers for all browsers
+                script.onload = script.onreadystatechange = function() {
+                    if ( !done && (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") ) {
+                        done = true;
+                        _this.scriptLoaded = true;
+                        console.log('Finished Loading Socket-IO Script');
+                        _this.init();
+                        if (_this.autoConnect) this.connect();
+                        if (_this.ws !== undefined) {
+                            for (var i = 0; i < _this.listenTo.length; i++) {
+                                var messageName = _this.listenTo[i];
+                                _this.ws.on(messageName, _this.onMessageReceived.bind(_this, messageName));
+                            }
+                       }
+                    };
+                };
+                // Must set src after onload
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/' + this.socketVersion + '/socket.io.js';
+                this.appendChild(script);
+            },
+
+            /**
+             * The `emit` method will send an event with 'data' as content
+             * 
+             * @method emit
+             * @param {String} event event to send
+             * @param {String} data data to send
+             */
+            emit: function(event, data) {
+                //console.log("sending '"+event+ "'via polymer-socket-io: data",data);
+                try {
+                    if (this.ws) this.ws.emit(event, {
+                        data: data
+                    });
+                } catch (error) {
+                    console.error("cannot send message: error:" + error);
+                }
+            },
+            /**
+             * The `connect` method will ...connect this instance to the server at
+             * the current socketUrl
+             * it also disconnects this instance if previously connected before re-connecting
+             * 
+             * @method connect
+             */
+            connect: function() {
+                this.disconnect();
+                this.ws.connect();
+            },
+            /**
+             * The `disconnect` method will ...disconnect this instance from the server
+             * 
+             * @method disconnect
+             */
+            disconnect: function() {
+                if (this.ws != undefined && !this.connected) {
+                    try {
+                        this.ws.disconnect();
+                    } catch (error) {
+                        this.onError(error);
+                    }
+                }
+            },
+            outMessageChanged: function() {
+                if (this.outMessage) {
+                    var fullMessage = this.outMessage;
+                    var eventName = this.outEventName;
+                    if (this.outMessage instanceof Object) {
+                        if ("event" in fullMessage) {
+                            eventName = fullMessage.event;
+                            fullMessage = fullMessage.data;
+                        }
+                    }
+                    this.emit(eventName, fullMessage);
+                }
+            },
+            socketUrlChanged: function() {
+                if (this.connected) this.connect();
+            },
+            namespaceChanged: function() {
+                if (this.connected) this.connect();
+            },
+            listenToChanged: function(newListenTo, oldListenTo) {
+                console.log('listenToList changed',this.listenTo,this.connected,this.ws);
+                if (this.ws !== undefined) {
+                    if (oldListenTo) {
+                        for (var i = 0; i < oldListenTo.length; i++) {
+                            var messageName = oldListenTo[i];
+                            this.ws.removeAllListeners(messageName);
+                        }
+                    }
+                    for (var i = 0; i < newListenTo.length; i++) {
+                        var messageName = newListenTo[i];
+                        this.ws.on(messageName, this.onMessageReceived.bind(this, messageName));
+                    }
+                }
+            },
+            autoConnectChanged: function(newValue, oldValue) {
+                console.log(`Auto connect changed from ${oldValue} to ${newValue}`);
+                if (this.ws !== undefined) {
+                   if(newValue && !this.connected) {
+                      this.connect();
+                   }
+                }
+            },
+            // update socket io with new query
+            queryChanged: function(newValue, oldValue) {
+                if(this.ws){
+                    this.ws.io.opts.query=newValue;
+                };
+            },
+            showWarning: function() {
+                if (this.$.warningDialog && !this.$.warningDialog.visible) {
+                    this.$.warningDialog.show();
+                }
+            },
+
+            //event handlers
+            onConnect: function(event) {
+                console.log("polymer-socket-io connected")
+                this.connected = true;
+                this.fire('s-io-connected');
+            },
+            onDisconnect: function(event) {
+                console.log("polymer-socket-io disconnected" + event);
+                this.connected = false;
+                this.showWarning();
+                this.fire('s-io-disconnected', event);
+            },
+            onError: function(error,data) {
+                this.connected = false;
+                this.showWarning();
+                console.log('Error in polymer-socket-io', error);
+            },
+            onReconnectAttempt: function(error) {
+                console.log('Try to reconnect polymer-socket-io', error);
+            },
+            onReconnecting: function(error) {
+                console.log('Reconnecting polymer-socket-io', error);
+            },
+            onReconnectFailed: function(error) {
+                this.currentAttempt = this.currentAttempt+1;
+                if(this.currentAttempt>=this.reconnectionAttempts) {
+                   this.fire('s-io-reconnect-failed', error);
+                }
+                console.log('Reconnect failed polymer-socket-io', error);
+            },
+            onMessageReceived: function(event, msg) {
+                this.inMessage = {
+                    event: event,
+                    data: msg
+                };
+                this.fire('s-io-' + event, {
+                    msg: msg
+                });
+            },
+            beforeUnload: function(event) {
+                this.disconnect();
+                console.log("before unload");
+                this.manager.removeAllListeners('connect');
+                this.manager.removeAllListeners('disconnect');
+                this.manager.removeAllListeners('error');
+                this.manager.removeAllListeners('connect_failed');
+                for (var i = 0; i < this.listenTo.length; i++) {
+                    var messageName = this.listenTo[i];
+                    this.ws.removeAllListeners(messageName)
+                }
+                this.ws = null;
+                this.manager = null;
+            }
+        });
+    })();
+    </script>
+</dom-module>

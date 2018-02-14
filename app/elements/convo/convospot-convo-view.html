@@ -1,0 +1,166 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer-scroll-threshold/polymer-scroll-threshold.html">
+<link rel="import" href="convospot-convo-item.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<dom-module id="convospot-convo-view">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <style>
+     :host {}
+
+    ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .scroll-container {
+        overflow-y: auto;
+        height: calc(100% - 140px);
+        padding: 0 10px;
+    }
+
+    .typing-indicator {
+        position: absolute;
+        top: 10px;
+        left: 40px;
+    }
+
+    .spinner-container {
+        margin: 10px 0;
+    }
+
+    .message-bulk {
+        background: white;
+        margin-bottom: 10px;
+        padding: 5px 0 10px;
+        border-radius: 5px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+    }
+    </style>
+    <template>
+        <polymer-scroll-threshold id="threshold" upper-threshold="50" on-upper-trigger="_loadMore" lower-threshold="50" on-lower-trigger="_scrollToEnd" fit></polymer-scroll-threshold>
+        <div id="scrollContainer" class="scroll-container">
+            <ul>
+                <!-- <template id="convo-repeater" is="dom-repeat" items="{{items}}" filter="{{matchesFilter(route)}}" observe="completed" initial-count="10" strip-whitespace>
+                    <li class="animated fadeIn" is="convospot-convo-item" data-index="{{displayIndex(index)}}" item="{{item}}" cid="[[cid]]"></li>
+                </template> -->
+                <template id="convo-repeater" is="dom-repeat" items="[[_computeBulks(items,items.*)]]" filter="{{matchesFilter(route)}}" observe="completed" initial-count="10" strip-whitespace>
+                    <li>
+                        <template is="dom-if" if="{{item.length}}">
+                            <ul class="message-bulk">
+                                <template is="dom-repeat" items="{{item}}" as="message">
+                                    <li class="animated fadeIn" is="convospot-convo-item" item="{{message}}" cid="[[cid]]"></li>
+                                </template>
+                            </ul>
+                        </template>
+                    </li>
+                </template>
+            </ul>
+            <div class$="show-{{showSpinner}}">
+                <div class="spinner-container relative-helper">
+                    <paper-icon-button src='../../images/avatar-ai.png'></paper-icon-button>
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <script>
+    (function() {
+        'use strict';
+        Polymer({
+            is: 'convospot-convo-view',
+            behaviors: [],
+            properties: {
+                items: {
+                    type: Array,
+                    notify: true,
+                    value: function() {
+                        return [];
+                    }
+                },
+                cid: {
+                    type: String,
+                    notify: true
+                },
+                model: {
+                    type: Object
+                },
+                modelId: {
+                    type: String
+                },
+                scrolled: {
+                    type: Boolean,
+                    value: false
+                },
+                showSpinner: {
+                    type: Boolean,
+                    notify: true,
+                    value: false
+                },
+                route: {
+                    type: String
+                }
+            },
+            observers: [
+                '_itemsChanged(items.*)'
+            ],
+            attached: function() {
+                this.model = document.querySelector('#' + this.modelId);
+            },
+            ready: function() {
+                this.$.threshold.scrollTarget = this.$.scrollContainer;
+                this.async(this.keepBottom, 2000);
+            },
+            keepBottom: function() {
+                // if(!this.scrolled) {
+                //   this.scrollTop = this.scrollHeight;
+                // }
+                this.$.scrollContainer.scrollTop = this.$.scrollContainer.scrollHeight + 500;
+            },
+            _computeBulks: function(items, changes) {
+                var bulks = [];
+                var bulksPointer = 0;
+                if (items.length) {
+                    items.forEach(function(item, index) {
+                        if (item.appendOnly) {
+                            bulks[bulksPointer].push(item);
+                        } else {
+                            if (item) {
+                                bulksPointer++;
+                                bulks[bulksPointer] = [item];
+                            }
+                        }
+                    });
+                }
+                return bulks;
+            },
+            displayIndex: function(index) {
+                return index + 1;
+            },
+            _itemsChanged: function() {
+                this.async(this.keepBottom, 1000);
+            },
+            _loadMore: function(e) {
+                // load more from server in top
+                // stop auto scroll if user scrolled, instead show new message notice for a few seconds
+
+                console.log('top reached');
+
+            },
+            _scrollToEnd: function(e) {
+                // load more from server in top
+                // stop auto scroll if user scrolled, instead show new message notice for a few seconds
+                this.scrolled = false;
+                console.log('end reached');
+            }
+        });
+    })();
+    </script>
+</dom-module>

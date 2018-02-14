@@ -1,0 +1,233 @@
+<!-- Launch point for widget -->
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<!-- Add your elements here -->
+<link rel="import" href="core/import.html">
+<link rel="import" href="core/socket-io.html">
+<link rel="import" href="core/config.html">
+<link rel="import" href="core/cache.html">
+<link rel="import" href="core/ajax.html">
+<link rel="import" href="core/base.html">
+<link rel="import" href="core/constant.html">
+<link rel="import" href="core/convospot-session.html">
+<link rel="import" href="services/blueprint.html">
+<link rel="import" href="services/session.html">
+<link rel="import" href="widget/convospot-widget.html">
+<link rel="import" href="widget/convospot-widget-message.html">
+<link rel="import" href="sidebar/convospot-sidebar.html">
+<dom-module id="convospot-launcher">
+    <style include="reset-styles"></style>
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <template>
+        <convospot-session id="session" has-auth="{{hasAuth}}" jwt-token="{{jwtToken}}" bid="[[bid]]" token="[[token]]" convo="[[convo]]"></convospot-session>
+        <socket-io id="socketio" socket-version="[[socketVersion]]" socket-url="[[socketUrl]]" socket-path="[[socketPath]]" namespace="[[socketNamespace]]" socket-query="[[socketQuery]]" listen-to="[[listenEvents]]" in-message="{{inMessage}}" out-message="{{outMessage}}" out-event-name="message" connected="{{connected}}" on-s-io-disconnected="_disconnectHandler" on-s-io-reconnect-failed="_reconnectFailedHandler">
+        </socket-io>
+        <convospot-widget-message id="widget" on-tap="" connected="{{connected}}" convo="{{convo}}" new-message="{{newMessage}}"></convospot-widget-message>
+        <convospot-widget id="widget" on-tap="toggleSidebar" connected="{{connected}}" cid="{{cid}}" badge="{{newMessageCounter}}"></convospot-widget>
+        <convospot-sidebar class="cleanslate" id="sidebar" show="{{showSidebar}}" connected="{{connected}}" socket-id="socketio" bid="[[bid]]" convo="[[convo]]" visitor="[[visitor]]" jwt-token="[[jwtToken]]" new-message-counter="{{newMessageCounter}}" new-message="{{newMessage}}" in-message={{inMessage]]></convospot-sidebar>
+    </template>
+</dom-module>
+<script>
+Polymer({
+    is: 'convospot-launcher',
+    behaviors: [Spinel.Base, Spinel.Config, Spinel.Services],
+    properties: {
+        bot: {
+            type: String,
+            computed: '_getBot(bid)'
+        },
+        socketNamespace: {
+            type: String
+        },
+        /**
+         * Bot Token
+         */
+        token: {
+            type: String,
+            value: '',
+            notify: true
+        },
+        error: {
+            type: Object,
+            value: {},
+            notify: true
+        },
+        /**
+         * Indicator of auth complete (both bot and convo)
+         */
+        hasAuth: {
+            type: Boolean,
+            value: false,
+            notify: true
+        },
+        connected: {
+            type: Boolean,
+            notify: true,
+            value: false,
+            observer: '_changeConnection'
+        },
+        showSidebar: {
+            type: Boolean,
+            value: false,
+            notify: true
+        },
+        newMessageCounter: {
+            type: Number,
+            value: 0,
+            notify: true
+        },
+        newMessage: {
+            type: String,
+            value: null,
+            notify: true
+        },
+        listenEvents: {
+            type: Array,
+            value: ["create_message", "delete_message", "update_message", "start_ask_engine"],
+            notify: true
+        },
+        socketQuery: {
+            type: String,
+            computed: '_getSocketQuery(convo,visitor)'
+        },
+        inMessage: {
+            type: Object,
+            value: null,
+            notify: true
+        }
+    },
+
+    /**
+     * Try to auth the bot first
+     * then reconnect the old conversation from conversation id in cookie 
+     * or create a new conversation
+     */
+    ready: function() {
+
+        if (!Spinel.getConfig('debugMode')) {
+            console = console || {};
+            console.log = function() {};
+        }
+
+        this.$.session.auth().catch(function(err) {
+            console.error(err);
+        });
+
+        PubSub.subscribe('convospot_analytics',function(topic,data){
+            this.$.socketio.emit('analytics',data);
+        }.bind(this));
+
+        PubSub.subscribe(Spinel.Constant.AUTH_SUCCESS, function() {
+            let currentConvo = Spinel.Cache.getItem(this.bid + ':convo');
+            let currentVisitor = Spinel.Cache.getItem(this.bid + ':visitor');
+            if (currentConvo && currentVisitor) {
+                this.convo = currentConvo;
+                this.visitor = currentVisitor;
+                console.log("Join conversation:"+this.convo.id);
+                console.log("As visitor:"+this.visitor.id);
+                this.$.session.replaceJwtToken().then(function() {
+                        this.$.socketio.connect();
+                        // Make api call to fill previous messages
+                    }.bind(this))
+                    .catch(function(err) {
+                        // The currenConvo not working.
+                        // This may caused by server error
+                        // Should create a new convo
+                        console.error(err);
+                        this._createConvo();
+                    }.bind(this));
+            } else {
+                this._createVisitor(this._createConvo.bind(this));
+            }
+        }.bind(this));
+
+        PubSub.subscribe(Spinel.Constant.SIO_CONNECT, function() {
+            this.$.socketio.connect();
+        }.bind(this));
+    },
+
+    toggleSidebar: function() {
+        this.showSidebar = !this.showSidebar;
+    },
+
+    /**
+     * if disconnected by server (e.g., dev/maintain/failture)
+     * remove cookie and force to create a new conversation
+     */
+    _changeConnection: function(connected) {
+        //TODO: if disconnected for a long time, clear cookie and launch a new conversation
+        // if(!connected){
+        //     this.$.convoCookie.eraseCookie();
+        // }
+    },
+
+    /**
+     * Add query parameters for auth and join room
+     * @param  {[type]} convo   [description]
+     * @param  {[type]} visitor [description]
+     * @return {[type]}         [description]
+     */
+    _getSocketQuery: function(convo, visitor) {
+        var query = '';
+        if ('token' in convo)
+            query = `type=widget&&token=${convo.token}&&cid=${convo.id}&&vid=${visitor.id}&&bid=${this.bid}`;
+        return query;
+    },
+
+    _getBot: bid => {
+        return Spinel.Cache.getItem(bid + ':bot');
+    },
+
+    _createConvo: function() {
+        this.blueprint.create('conversations', { bot: this.bid, visitor: this.visitor.id }, this.jwtToken, {
+            'Convospot-Extra': 'create-convo-by-bot'
+        }).then(resp => {
+            //get conversation token, using it to connect
+            if (this.checkResp(resp)) {
+                this.convo = resp.data;
+                this.$.session.replaceJwtToken(); //get conversation token, using it to connect
+                Spinel.Cache.setItem(this.bid + ':convo', resp.data);
+                this.$.socketio.connect();
+                this.$.socketio.autoConnect = true;
+            }
+        });
+    },
+
+    _createVisitor: function(next) {
+        this.blueprint.create('visitors', { bot: this.bid }, this.jwtToken).then(resp => {
+            if (this.checkResp(resp)) {
+                this.visitor = resp.data;
+                Spinel.Cache.setItem(this.bid + ':visitor', resp.data);
+                next();
+            }
+        });
+    },
+
+    _disconnectHandler: function(event) {
+        var that = this;
+        // If force closed with detail 'forced close', it means a server-side close or token no longer invalid, start a new conversation
+        // otherwise, do noting and keep trying reconnect
+        if (event && event.detail === 'forced close') {
+            this.$.socketio.autoConnect = false;
+            this._createConvo();
+        }
+    },
+
+    _reconnectFailedHandler: function(event) {
+        // If failed all attemps, show manual reconnect
+        PubSub.publish('convospot-widget-notice', {
+            level: 'error',
+            code: 'RECONNECT_FAILED',
+            text: 'Reconnecting failed',
+            showSpinner: false,
+            disableClose: true,
+            action: {
+                label: 'retry',
+                process: function() {
+                    PubSub.publish(Spinel.Constant.SIO_CONNECT);
+                }
+            }
+        });
+    }
+});
+</script>

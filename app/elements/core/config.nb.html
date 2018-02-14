@@ -1,0 +1,102 @@
+<script>
+var Spinel = Spinel || {};
+Spinel.Config = {
+    properties: {
+        /**
+         * version.
+         */
+        version: {
+            type: String,
+            value: 'v2',
+            notify: true
+        },
+        /**
+         * Role that has administrative privileges in the target application.
+         */
+        adminRole: {
+            type: String,
+            value: 'administrator',
+            notify: true
+        },
+        /**
+         * widget URL.
+         */
+        widgetUrl: {
+            type: String,
+            value: "__widgetUrl",
+            notify: true
+        },
+        /**
+         * service base URL.
+         */
+        apiUrl: {
+            type: String,
+            value: "__apiUrl",
+            notify: true
+        },
+        /**
+         * web socket URL.
+         */
+        socketUrl: {
+            type: String,
+            value: '__socketUrl',
+            notify: true
+        },
+        /**
+         * web socket path.
+         */
+        socketPath: {
+            type: String,
+            value: '__socketPath',
+            notify: true
+        },
+        /**
+         * Socket.io version
+         * @type {Object}
+         */
+        socketVersion: {
+            type: String,
+            value: '__socketVersion',
+            notify: true
+        },
+        /**
+         * Socket namespace
+         * @type {Object}
+         */
+        socketNamespace: {
+            type: String,
+            value: '__socketNamespace',
+            notify: true
+        },
+        /**
+         * Debug for verbose log
+         * @type {Object}
+         */
+        debugMode: {
+            type: String,
+            value: __debugMode,
+            notify: true
+        },
+        application: {
+            type: String,
+            value: '__application',
+            notify: true
+        },
+        cacheExpiration: {
+            type: Number,
+            value: __cacheExpiration,
+            notify: true
+        },
+        env: {
+            type: String,
+            value: '__env',
+            notify: true
+        }
+    }
+};
+
+Spinel.getConfig = (name) => {
+    var config = Spinel.Config.properties[name];
+    return config ? config.value : null;
+}
+</script>

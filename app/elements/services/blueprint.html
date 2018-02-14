@@ -1,0 +1,25 @@
+<!-- a generic service to wrap api calls -->
+<script>
+var Spinel = Spinel || {};
+Spinel.Services = Spinel.Sevices || {};
+Spinel.Services.blueprint = {
+    /**
+     * Create a model via api
+     * @param  {String} modelName the modeName in api route
+     * @param  {Object} data      the post data
+     * @param  {String} token     jwt token
+     * @param  {Object} extra     extra headers
+     * @return {Promise}          
+     */
+    create: (modelName, data, token, extra = {}) => {
+        return Spinel.Ajax.go(Spinel.getConfig('apiUrl') + '/' + modelName,
+                'POST',
+                data,
+                'Bearer ' + token,
+                extra)
+    },
+    update: (modelName, id, data) => console.log(''),
+    patch: (modelName, id, fields, data) => console.log(''),
+    delete: (modelName, id) => console.log('')
+}
+</script>

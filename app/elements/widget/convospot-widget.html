@@ -1,0 +1,131 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-badge/paper-badge.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<dom-module id="convospot-widget">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <template>
+        <style include="shared-styles"></style>
+        <style>
+         :host {
+            display: block;
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            /*z-index: 10000;*/
+            @apply(--layout);
+            @apply(--layout-vertical);
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            --color-one: #3d3d3d;
+            --color-two: #9b4dca;
+            --color-three: #C3C3E5;
+        }
+
+        .circle {
+            display: inline-block;
+            box-sizing: border-box;
+            width: 30px;
+            height: 30px;
+            margin: 16px;
+            border-radius: 50%;
+            opacity: 0.8;
+            /*z-index: 10001;*/
+            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, .4);
+        }
+
+        .circle.dark {
+            background: var(--color-one);
+        }
+
+        .circle.light {
+            background: var(--color-three);
+        }
+
+        .circle.complex {
+            background: var(--color-two);
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading {
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            border: 0.35rem solid white;
+            border-top-color: #ddd;
+            -webkit-animation: spin 1s infinite linear;
+            animation: spin 10s infinite linear;
+            position: relative;
+        }
+
+        .widget {
+            height: 30px;
+            width: 30px;
+            position: absolute;
+            top: -3px;
+            left: -3px;
+        }
+
+        paper-badge {
+            left: 35px !important;
+            top: 10px !important;
+            --paper-badge-background: var(--paper-light-blue-300);
+        }
+
+        .circle:hover {
+            opacity: 1;
+        }
+        </style>
+        <div id="spot" class$="circle animated zoomIn show-{{connected}}">
+            <div class="loading">
+                <img class="widget" src="../../images/widget.png" alt="a widget to lunch convospot"></img>
+            </div>
+        </div>
+        <template is="dom-if" if="{{badge}}">
+            <paper-badge label="{{badge}}" role="status" aria-label="{{badge}}">
+            </paper-badge>
+        </template>
+    </template>
+    <script>
+    (function() {
+        'use strict';
+
+        Polymer({
+            is: 'convospot-widget',
+            behaviors: [],
+            properties: {
+                connected: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                },
+                badge: {
+                    type: Number,
+                    value: 0,
+                    notify: true
+                },
+                cid: {
+                    type: String,
+                    value: '',
+                    notify: true
+                },
+                show: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                }
+            }
+        });
+    })();
+    </script>
+</dom-module>

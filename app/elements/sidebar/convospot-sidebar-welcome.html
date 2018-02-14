@@ -1,0 +1,79 @@
+<!-- To show welcome -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icons/communication-icons.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<link rel="import" href="../bot/convospot-bot.html">
+<link rel="import" href="../core/base.html">
+<dom-module id="convospot-sidebar-welcome">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <style>
+    .dialog {
+        width: calc(100% - 40px);
+        margin: auto;
+        margin-top: 64px;
+        font-size: 14px;
+    }
+    
+    .dialog .intro {
+        text-align: center;
+    }
+
+    .dialog .action {
+        text-align: center;
+    }
+    
+    .dialog>div {
+        border-bottom: solid 1px #eaebeb;
+        margin: 0 15px;
+        padding: 10px 0;
+    }
+    </style>
+    <template>
+        <template is="dom-if" if="{{show}}">
+            <convospot-bot emotion="happy"></convospot-bot>
+            <div class="dialog arrow_box">
+                <div class="intro">
+                    <p>Meet our convospot.
+                        <br/> An intelligent assistant who can:
+                    </p>
+                </div>
+                <div>
+                    <paper-icon-button icon="communication:chat-bubble-outline" class="primary small"></paper-icon-button>
+                    <span>Answer questions</span>
+                </div>
+                <div>
+                    <paper-icon-button icon="communication:mail-outline" class="primary small"></paper-icon-button>
+                    <span>Communicate</span>
+                </div>
+                <div>
+                    <paper-icon-button icon="communication:present-to-all" class="primary small"></paper-icon-button>
+                    <span>Instant help</span>
+                </div>
+                <div class="action">
+                    <span><paper-button class="small primary borderless">Learn more</paper-button></span><span><paper-button class="small primary borderless">Got it</paper-button></span>
+                </div>
+            </div>
+        </template>
+    </template>
+</dom-module>
+<script>
+(function() {
+    'use strict';
+    Polymer({
+        is: 'convospot-sidebar-welcome',
+        behaviors: [Spinel.Base],
+        listeners: {},
+        properties: {
+            show: {
+                type: Boolean,
+                notify: true,
+                value: true
+            }
+        }
+    });
+})();
+</script>

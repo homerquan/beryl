@@ -1,0 +1,130 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/iron-icons/image-icons.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../vendor/emoji-selector.html">
+<link rel="import" href="../message/message-dialog.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<dom-module id="convospot-convo-input">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <style>
+    .input-container {
+        @apply(--layout-horizontal);
+        border-top: solid 1px #d3d3d3;
+        border-bottom: solid 1px #d3d3d3;
+    }
+    
+    .input-container:focus {
+        border-top: solid 1px #822193;
+        border-bottom: solid 1px #822193;
+    }
+    
+    .flexchild {
+        @apply(--layout-flex);
+    }
+    
+    paper-textarea /deep/ paper-input-container {
+        padding: 4px 0 8px 0;
+    }
+    
+    paper-menu {
+        background: white;
+    }
+    
+    paper-item {
+        font-size: 14px;
+    }
+    
+    paper-menu-button {
+        padding: 0;
+    }
+    
+    iron-icon {
+        color: #9e9e9e;
+        width: 18px;
+        height: 18px;
+    }
+    </style>
+    <template>
+        <iron-signals on-iron-signal-send-success="sendSuccess"></iron-signals>
+        <iron-signals on-iron-signal-send-failure="sendFailure"></iron-signals>
+        <iron-a11y-keys target="[[target]]" keys="shift+enter" on-keys-pressed="newLine"></iron-a11y-keys>
+        <iron-a11y-keys target="[[target]]" keys="enter" on-keys-pressed="send"></iron-a11y-keys>
+        <div class="input-container">
+            <div>
+                <paper-menu-button vertical-align="bottom" horizontal-align="left" close-on-activate="true">
+                    <paper-icon-button icon="icons:add-circle" class="primary dropdown-trigger"></paper-icon-button>
+                    <paper-menu class="dropdown-content">
+                        <paper-item on-tap="openMessage">
+                            <iron-icon icon="icons:drafts"></iron-icon>Send a message</paper-item>
+                    </paper-menu>
+                </paper-menu-button>
+            </div>
+            <div class="flexchild">
+                <paper-textarea id="messageInput" max-rows="3" value="{{message}}" placeholder="type your message" no-label-float="true" autofocus></paper-textarea>
+            </div>
+            <div>
+                <emoji-selector id="emoji" input-target-id="messageInput" suffix></emoji-selector>
+                <!-- <paper-icon-button icon="send" on-tap="send"></paper-icon-button> -->
+            </div>
+        </div>
+        <message-dialog id="messageDialog" cid="[[cid]]"></message-dialog>
+    </template>
+    <script>
+    (function() {
+        'use strict';
+        Polymer({
+            is: 'convospot-convo-input',
+            behaviors: [],
+            listeners: {},
+            properties: {
+                message: {
+                    type: String,
+                    value: "",
+                    notify: true
+                },
+                target: {
+                    type: Object,
+                    value: function() {
+                        return this.$.messageInput;
+                    }
+                },
+                cid: {
+                    type: String,
+                    value: ""
+                }
+            },
+            send: function(e) {
+                e.preventDefault();
+                var msg = this.message.trim();
+                if (msg && !e.detail.keyboardEvent.shiftKey) {
+                    this.fire('send', {
+                        text: msg
+                    });
+                    //TODO, check confirm here
+                    this.sendSuccess();
+                } else {
+                    return false;
+                }
+            },
+            newLine: function(e) {
+                e.preventDefault();
+            },
+            sendSuccess: function() {
+                _.defer(function() {
+                    this.message = null;
+                }.bind(this));
+
+            },
+            openMessage: function() {
+                this.$.messageDialog.open();
+            }
+        });
+    })();
+    </script>
+</dom-module>

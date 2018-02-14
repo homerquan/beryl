@@ -1,0 +1,64 @@
+<script>
+
+var Spinel = Spinel || {};
+
+
+Spinel.Base = {
+    properties: {
+        bid: {
+            type: String,
+            value: '',
+            notify: true
+        },
+        cid: {
+            type: String,
+            computed: '_getCid(convo)'
+        },
+        /**
+         * JWT Token for access api
+         */
+        jwtToken: {
+            type: String,
+            value: '',
+            notify: true
+        },
+        convo: {
+            type: Object,
+            value: {},
+            notify: true
+        }
+    },
+    created: function() {
+        console.log(this.localName + '#' + this.id + ' was created');
+    },
+
+    ready: function() {
+        console.log(this.localName + '#' + this.id + ' has local DOM initialized');
+    },
+
+    attached: function() {
+        console.log(this.localName + '#' + this.id + ' was attached');
+    },
+
+    detached: function() {
+        console.log(this.localName + '#' + this.id + ' was detached');
+    },
+
+    attributeChanged: function(name, type) {
+        console.log(this.localName + '#' + this.id + ' attribute ' + name +
+            ' was changed to ' + this.getAttribute(name));
+    },
+
+    _getCid: convo => {
+        return convo.id;
+    },
+
+    checkResp: function(resp) {
+        if (resp.code && 'data' in resp) {
+            return true
+        }
+        console.error('response is not in right format');
+        return false;
+    }
+}
+</script>

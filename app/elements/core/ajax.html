@@ -1,0 +1,105 @@
+<!-- ajax for consuming Spinel api -->
+<script type="text/javascript" src="../../bower_components/fetch/fetch.js"></script>
+<script>
+var Spinel = Spinel || {};
+Spinel.Ajax = {
+    /**
+     * Go method performs a HTTP request to the URL specified in the param list. User can specify method, body content, authorization fields and a content type of the request.
+     */
+    go: function(url, method, body, authorization = null, otherHeaders = {}, contentType = 'application/json') {
+        //send json string for body
+        if (contentType === 'application/json' && body && typeof body === 'object') {
+            body = JSON.stringify(body);
+        }
+        var SpinelUser = Spinel.Cache.getItem('SpinelUser');
+        var otherHeaders = otherHeaders || {};
+        var promise = new Promise(function(resolve, reject) {
+            var authHeader = '';
+            if (SpinelUser && SpinelUser.accessToken) {
+                authHeader = SpinelUser.tokenType + ' ' + SpinelUser.accessToken;
+                //referesh token sliding expiration time
+                SpinelUser.expiresAbsolute = new Date(new Date().getTime() + (SpinelUser.expiresIn * 1000));
+                Spinel.Cache.setItem('SpinelUser', SpinelUser, {
+                    expirationAbsolute: SpinelUser.expiresAbsolute,
+                    expirationSliding: null,
+                    priority: Cache.Priority.HIGH,
+                    callback: null
+                });
+            } else {
+                authHeader = '';
+            }
+
+            var headers = _.extend({
+                'Authorization': ((!authorization) ? authHeader : authorization),
+                'Content-Type': ((!contentType) ? 'application/json' : contentType),
+                'Convospot-Client': 'bot-widget'
+            }, otherHeaders);
+
+            if (contentType === 'NONE') {
+                delete headers['Content-Type'];
+            }
+
+            fetch(url, {
+                    method: ((method) ? method : 'GET'),
+                    body: ((body) ? body : null),
+                    headers: headers
+                })
+                .then(function(response) {
+                    if (response.status >= 200 && response.status < 300) {
+                        return Promise.resolve(response);
+                    } else {
+                        return Promise.reject(new Error(response.statusText));
+                    }
+                })
+                .then(function(response) {
+                    if (response && response.headers.get("Content-Type") && response.headers.get("Content-Type").indexOf('json') > -1) {
+                        return Promise.resolve(response.json());
+                    } else {
+                        if (response)
+                            return Promise.resolve(response);
+                        else
+                            return Promise.reject(new Error('No response content'));
+                    }
+                })
+                .then(function(data) {
+                    resolve(data);
+                }).catch(function(error, data) {
+                    console.log(error);
+                    console.log(data);
+                    reject(error);
+                })
+        })
+        return promise;
+    },
+
+    /**
+     * Retrieves an object from the local cache based on its key.
+     */
+    getFromCache: function(url, cacheKey, collectionKey, cacheExpiration) {
+        var _this = this;
+        return new Promise(function(resolve, reject) {
+            if (!Spinel.Cache.getItem(cacheKey)) {
+                Spinel.Ajax.go(url).then(function(response) {
+                    Spinel.Cache.setItem(cacheKey, response[collectionKey], {
+                        expirationAbsolute: new Date(new Date().getTime() + (cacheExpiration * 1000)),
+                        expirationSliding: null,
+                        priority: Cache.Priority.HIGH,
+                        callback: null
+                    });
+                    resolve({
+                        data: response[collectionKey]
+                    });
+                }, function(error) {
+                    reject({
+                        data: null
+                    });
+                }.bind(_this));
+            } else {
+                resolve({
+                    data: Spinel.Cache.getItem(cacheKey)
+                });
+            }
+        });
+    }
+}
+</script>

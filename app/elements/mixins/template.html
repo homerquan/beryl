@@ -1,0 +1,12 @@
+<!-- template utilities -->
+<script type="text/javascript" src="../../bower_components/moment/moment.js"></script>
+<script>
+var Spinel = Spinel || {};
+Spinel.Template = {
+    properties: {
+    	_humanizeTime: function(time) {
+            return moment(time).fromNow();
+        }
+    }
+}
+</script>

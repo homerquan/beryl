@@ -1,0 +1,13 @@
+{
+  "name": "jscache",
+  "homepage": "https://github.com/monsur/jscache",
+  "_release": "abe76fb11d",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "abe76fb11d52fb86fe7711d9071e713b38f592ec"
+  },
+  "_source": "https://github.com/monsur/jscache.git",
+  "_target": "*",
+  "_originalSource": "jscache"
+}

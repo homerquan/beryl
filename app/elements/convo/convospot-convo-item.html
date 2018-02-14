@@ -1,0 +1,413 @@
+<!-- Single convosation item -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
+<!-- <link rel="import" href="../../bower_components/identicon-element/identicon-element.html"> -->
+<link rel="import" href="../cards/convospot-action-card.html">
+<link rel="import" href="../mixins/template.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<dom-module id="convospot-convo-item">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <style>
+     :host {
+        --icon-color: #555459;
+        --border-color: rgba(0, 0, 0, .15);
+    }
+
+    .message {
+        position: relative;
+    }
+
+    .message-content {
+        margin-top: 0px;
+        margin-left: 40px;
+    }
+
+    .message-author {
+        border-radius: 5px;
+        padding: 2px 5px 2px;
+        color: white;
+        background: var(--light-primary-color);
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .message.source-visitor .message-author {
+        background: var(--convospot-grey-bg-color);
+    }
+
+    .message-time {
+        color: #ddd;
+        font-size: 14px;
+        padding: 0px 4px;
+        float: right;
+    }
+
+    .message-gutter {
+        width: 40px;
+        padding-right: 10px;
+        text-align: right;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .spinner>div {
+        background: #ddd;
+    }
+
+    .message-header {
+        margin: 10px 0px 10px;
+    }
+
+    .message-menu {
+        position: absolute;
+        right: 4px;
+        bottom: -5px;
+        display: none;
+        background: white;
+    }
+
+    .message-menu paper-icon-button {
+        width: 32px;
+        height: 32px;
+        color: var(--convospot-grey-bg-color);
+        display: none;
+    }
+
+    .message .message-menu paper-icon-button {
+        display: inline-block;
+    }
+
+    .message:hover .message-menu {
+        display: block;
+    }
+
+    .message-footer {
+        position: absolute;
+        right: 5px;
+        bottom: -8px;
+    }
+
+    paper-icon-button.avatar {
+        width: 40px;
+        height: 40px;
+        margin-top: -10px;
+        top: -2px;
+    }
+
+    paper-card.action {
+        margin: 2px 4px;
+    }
+
+    paper-icon-button.action {
+        color: var(--icon-color);
+        --paper-icon-button-ink-color: var(--icon-color);
+    }
+
+    paper-icon-button /deep/ img {
+        border-radius: 5px;
+    }
+
+    paper-textarea {
+        background: #eee;
+        padding: 5px;
+    }
+
+    .edit {
+        background: white;
+    }
+
+    .edit-container {
+        position: relative;
+    }
+
+    .edit-control {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+    }
+
+    h1.side-line {
+        display: inline-block;
+        padding: 0 15px;
+        position: relative;
+        color: #9e9ea6;
+        font-size: 14px;
+        margin: 10px 0px
+    }
+
+    h1.side-line:before,
+    h1.side-line:after {
+        background: #ddd;
+        content: "";
+        display: block;
+        height: 1px;
+        position: absolute;
+        top: 50%;
+        width: 400%;
+    }
+
+    h1.side-line:before {
+        right: 100%;
+    }
+
+    h1.side-line:after {
+        left: 100%;
+    }
+
+    .side-line-container {
+        overflow: hidden;
+        text-align: center;
+    }
+
+    .message .message-gutter {
+        display: none;
+    }
+
+    .message.first .message-gutter {
+        display: block;
+    }
+
+    .message .message-header {
+        display: none;
+    }
+
+    .message.first .message-header {
+        display: block;
+    }
+
+    .message.append .message-time {
+        display: none;
+    }
+
+    .side-line-container+.message {
+        .message-gutter {
+            display: none;
+        }
+    }
+
+    .acknowledged-false {
+        opacity: 0.5;
+    }
+
+    .message-action {
+        color: #ddd;
+    }
+    </style>
+    <template>
+        <!-- this template shared by message and action card -->
+        <template is="dom-if" if="{{!item.appendOnly}}">
+            <template is="dom-if" if="{{item.showTimeline}}">
+                <div class="side-line-container">
+                    <h1 class="side-line">{{_calendarTime(item.updatedAt)}}</h1>
+                </div>
+            </template>
+        </template>
+        <template is="dom-if" if="{{isLanguage(item)}}">
+            <div class$="message {{_getAppendClass(item)}} acknowledged-{{item.acknowledged}} source-{{item.source}}">
+                <template is="dom-if" if="{{!editing}}" strip-whitespace>
+                    <div class="message-menu">
+                        <template is="dom-if" if="{{!isOwner(item)}}" strip-whitespace>
+                            <paper-icon-button icon="icons:thumb-up" title="like" class="message-action" on-tap="{{item.like::change}}"></paper-icon-button>
+                            <paper-icon-button icon="icons:thumb-down" title="dislike" class="message-action" on-tap="{{item.unlike::change}}"></paper-icon-button>
+                        </template>
+                        <template is="dom-if" if="{{isOwner(item)}}" strip-whitespace>
+                            <!-- <paper-icon-button icon="editor:mode-edit" title="edit" class="message-action" on-tap="_enableEditingMode"></paper-icon-button>
+                            <paper-icon-button icon="icons:delete" title="delete" class="message-action" on-tap="_destroyAction"></paper-icon-button> -->
+                        </template>
+                    </div>
+                </template>
+                <div class="message-gutter">
+                    <paper-icon-button src="{{getAvatar(item)}}" alt="{{_getName(item)}}" title="{{_getName(item)}}" class="avatar">
+                    </paper-icon-button>
+                </div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">{{_getName(item)}}</span>
+                        <span class="message-time">{{_humanizeTime(item.createdAt)}}</span>
+                    </div>
+                    <!-- TODO: add editing later -->
+                    <template is="dom-if" if="{{!editing}}" strip-whitespace>
+                        <div class="message-body">
+                            {{item.text}}
+                            <template is="dom-if" if="{{!item.acknowledged}}">
+                                <div class="spinner">
+                                    <div class="bounce1"></div>
+                                    <div class="bounce2"></div>
+                                    <div class="bounce3"></div>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="message-footer">
+                        </div>
+                    </template>
+                </div>
+                <!--if action card, show it-->
+                <!-- <paper-card heading="Emmental" image="http://placehold.it/350x150/FFC107/000000" class="action">
+                <div class="card-content">
+                    sample card
+                </div>
+                <div class="card-actions">
+                    <paper-button>Share</paper-button>
+                    <paper-button>Explore!</paper-button>
+                </div>
+            </paper-card> -->
+            </div>
+            <template is="dom-if" if="{{editing}}" strip-whitespace>
+                <div class="edit-container">
+                    <paper-textarea id="edit" class="edit" value="{{item.text::input}}">
+                    </paper-textarea>
+                    <div class="edit-control">
+                        <paper-icon-button on-tap="_saveEditing" icon="check" alt="save" title="save">
+                        </paper-icon-button>
+                        <paper-icon-button on-tap="_cancelEditing" icon="clear" alt="clear" title="clear">
+                        </paper-icon-button>
+                    </div>
+                </div>
+            </template>
+        </template>
+        <template is="dom-if" if="{{isAction(item)}}">
+            <convospot-action-card item="{{item}}" cid="[[cid]]"></convospot-action-card>
+        </template>
+    </template>
+</dom-module>
+<script>
+(function() {
+    'use strict';
+    Polymer({
+        is: 'convospot-convo-item',
+        extends: 'li',
+        behaviors: [Spinel.Base, Spinel.Template, Spinel.Config],
+        listeners: {},
+        properties: {
+            editing: {
+                type: Boolean,
+                value: false
+            },
+            cid: {
+                type: String,
+                notify: true
+            },
+            prevText: {
+                type: String,
+                value: ''
+            },
+            item: {
+                type: Object,
+                notify: true
+            }
+        },
+        observers: ['setHostClass(item.voted, editing)'],
+        isLanguage: function(item) {
+            return item.type === 'language';
+        },
+        isOwner: function(item) {
+            return item.source === 'visitor';
+        },
+        isAction: function(item) {
+            return item.type === 'action';
+        },
+        getAvatar: function(item) {
+            let img = '';
+            if (item.source === 'helper') {
+                img = '/images/avatar-helper.png';
+            } else if (item.source === 'ai') {
+                img = '/images/avatar-ai.png';
+            } else {
+                img = '/images/avatar-visitor.png';
+            }
+            return this.widgetUrl + img;
+        },
+        _getName: function(item) {
+            if (!item.author) {
+                if (item.source === 'visitor')
+                    return 'You';
+                else if (item.source === 'helper')
+                    return 'Helper';
+                else if (item.source === 'ai')
+                    return 'A.I.';
+                else
+                    return 'unknown';
+            } else {
+                return author;
+            }
+        },
+        setHostClass: function(voted, editing) {
+            // editing property and reflectToAttribute.
+            this.toggleClass('voted', voted);
+            this.toggleClass('editing', editing);
+        },
+        _destroyAction: function() {
+            this.go(this.apiUrl + '/messages/' + this.item.id,
+                    'DELETE',
+                    null,
+                    null,
+                    'application/json')
+                .then(this._postResponse.bind(this))
+                .catch(this._postError.bind(this));
+        },
+        _postResponse: function(data) {
+            console.log('success');
+
+        },
+        _postError: function(err) {
+            console.log('error');
+        },
+        _enableEditingMode: function() {
+            this.prevText = this.item.text || '';
+            this.editing = true;
+        },
+        _saveEditing: function() {
+            var body = {
+                text: this.item.text
+            };
+            if (this.context && this.context.cid) {
+                this.go(this.apiUrl + '/messages/' + this.item.id,
+                        'PATCH',
+                        body,
+                        null,
+                        'application/json')
+                    .then(this._postResponse.bind(this))
+                    .catch(this._postError.bind(this));
+            }
+            this.prevText = '';
+            this.editing = false;
+        },
+        _cancelEditing: function() {
+            this.item.text = this.prevText;
+            this.editing = false;
+        },
+        _humanizeTime: function(time) {
+            return moment(time).fromNow();
+        },
+        _calendarTime: function(time) {
+            return moment(time).calendar();
+        },
+        _showTime: function(item) {
+            var time = item.createdAt;
+            var noShowSpan = moment().subtract("minutes", 60);
+            var createTime = moment(time);
+            if (createTime < noShowSpan) {
+                return false;
+            } else {
+                return true;
+            }
+        },
+        _getAppendClass: function(item) {
+            if (item.appendOnly) {
+                return 'append';
+            } else {
+                return 'first'
+            }
+        },
+        attached: function() {
+            PubSub.publish('convo-item-attached');
+        }
+    });
+})();
+</script>

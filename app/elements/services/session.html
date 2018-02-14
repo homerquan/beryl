@@ -1,0 +1,35 @@
+<script>
+var Spinel = Spinel || {};
+Spinel.Services = Spinel.Sevices || {};
+Spinel.Services.session = {
+    login: (bid, token) => {
+        var body = {
+            bid: bid,
+            token: token
+        };
+        return Spinel.Ajax.go(Spinel.getConfig('apiUrl') + '/auth_bot',
+            'POST',
+            body,
+            null
+        )
+    },
+
+    // Using bot jwt and cid to get convo jwt
+    replaceJwtToken: (convo, token) => {
+
+        var body = {
+            cid: convo.id,
+            token: convo.token
+        };
+
+        return Spinel.Ajax.go(Spinel.getConfig('apiUrl') + '/replace_token',
+            'POST',
+            body,
+            'Bearer ' + token, 
+            {
+                'Convospot-Extra': 'create-convo-by-bot'
+            }
+        )
+    }
+}
+</script>

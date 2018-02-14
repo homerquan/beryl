@@ -1,0 +1,98 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
+<link rel="import" href="../core/base.html">
+<dom-module id="convospot-convo-model">
+    <template strip-whitespace>
+        <iron-localstorage id="convoStorage" name$="{{cid}}:conversations" value="{{items}}" on-iron-localstorage-load-empty="_initializeDefault"></iron-localstorage>
+    </template>
+    <script>
+    (function() {
+        'use strict';
+        Polymer({
+            is: 'convospot-convo-model',
+            behaviors: [Spinel.Base],
+            properties: {
+                items: {
+                    type: Array,
+                    notify: true,
+                    value: function() {
+                        return [];
+                    }
+                },
+                filter: {
+                    type: String
+                }
+            },
+            newItem: function(item) {
+                if (item) {
+                    var lastItem = this.items[this.items.length - 1];
+                    if (lastItem && lastItem.source === item.source) {
+                        item.appendOnly = true;
+                    };
+                    if (lastItem) {
+                        var duration = moment.duration(moment(item.updatedAt).diff(moment(lastItem.updatedAt)));
+                        if (duration.asMinutes() > 5) {
+                            item.showTimeline = true;
+                        } else {
+                            item.showTimeline = false;
+                        }
+                    }
+                    //make id unique (to avoid duplicated items)
+                    if (!_.findWhere(this.items, {
+                            id: item.id
+                        })) {
+                        this.push('items', item);
+                    }
+                }
+            },
+            acknowledgeCreate: function(id) {
+                var i = _.findIndex(this.items, function(item) {
+                    return item.id === id;
+                });
+                this.set(`items.${i}.acknowledged`, true);
+            },
+
+            getCompletedCount: function() {
+                return this.items ? this.items.filter(this.filters.completed).length : 0;
+            },
+            getActiveCount: function() {
+                return this.items ? (this.items.length - this.getCompletedCount(this.items)) : 0;
+            },
+            matchesFilter: function(item, filter) {
+                var fn = this.filters[filter];
+                return fn ? fn(item) : true;
+            },
+            destroyItem: function(item) {
+                var i = this.items.indexOf(item);
+                if (i > -1) {
+                    this.splice('items', i, 1)
+                }
+            },
+            destroyItemById: function(id) {
+                this.splice('items', _.findIndex(this.items, function(item) {
+                    return item.id === id;
+                }), 1);
+            },
+            clearCompletedItems: function() {
+                this.items = this.items.filter(this.filters.active);
+            },
+            setItemsCompleted: function(completed) {
+                for (var i = 0; i < this.items.length; ++i) {
+                    this.set(['items', i, 'completed'], completed);
+                }
+            },
+            filters: {
+                active: function(item) {
+                    return !item.completed;
+                },
+                completed: function(item) {
+                    return item.completed;
+                }
+            },
+            _initializeDefault: function() {
+                this.items = [];
+            }
+        });
+    })();
+    </script>
+</dom-module>
