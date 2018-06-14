@@ -120,6 +120,13 @@ gulp
 
 Build and optimize the current project, ready for deployment. This includes vulcanization, image, script, stylesheet and HTML optimization and minification.
 
+## Debug
+
+In console
+
+``PubSub.publish("debug_simulate",{"event":"show_overlay_tour","payload":"Are you interested in participate our early adoption program?"})``
+
+
 ## Application Theming & Styling
 
 Polymer 1.0 introduces a shim for CSS custom properties. We take advantage of this in `app/styles/app-theme.html` to provide theming for your application. You can also find our presets for Material Design breakpoints in this file.

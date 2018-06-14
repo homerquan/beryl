@@ -38,6 +38,7 @@
     document.getElementsByTagName('body')[0].appendChild(comp);
 
     // a function for custom button
+    // TODO: change to window.convospot.showSidebar...
     window.showConvospot = function() {
         var sidebar = document.querySelector('convospot-launcher');
         if (sidebar) {

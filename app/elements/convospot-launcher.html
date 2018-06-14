@@ -14,6 +14,8 @@
 <link rel="import" href="widget/convospot-widget.html">
 <link rel="import" href="widget/convospot-widget-message.html">
 <link rel="import" href="sidebar/convospot-sidebar.html">
+<!-- Quick demo -->
+<link rel="import" href="overlay/overlay-tour.html">
 <dom-module id="convospot-launcher">
     <style include="reset-styles"></style>
     <style include="custom-styles"></style>
@@ -25,6 +27,7 @@
         <convospot-widget-message id="widget" on-tap="" connected="{{connected}}" convo="{{convo}}" new-message="{{newMessage}}"></convospot-widget-message>
         <convospot-widget id="widget" on-tap="toggleSidebar" connected="{{connected}}" cid="{{cid}}" badge="{{newMessageCounter}}"></convospot-widget>
         <convospot-sidebar class="cleanslate" id="sidebar" show="{{showSidebar}}" connected="{{connected}}" socket-id="socketio" bid="[[bid]]" convo="[[convo]]" visitor="[[visitor]]" jwt-token="[[jwtToken]]" new-message-counter="{{newMessageCounter}}" new-message="{{newMessage}}" in-message={{inMessage]]></convospot-sidebar>
+        <overlay-tour></overlay-tour>
     </template>
 </dom-module>
 <script>
