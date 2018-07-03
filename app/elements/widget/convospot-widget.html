@@ -22,59 +22,128 @@
             --color-one: #3d3d3d;
             --color-two: #9b4dca;
             --color-three: #C3C3E5;
-            z-index: 9998;
+            z-index: 1000;
         }
 
         .circle {
-            display: inline-block;
+            z-index: 9;
+            position: relative;
+            display: block;
+            box-sizing: border-box;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            opacity: 0.5;
+            /*z-index: 10001;*/
+            background: white;
+            mix-blend-mode: darken;
+            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, .4);
+            background: linear-gradient(-45deg, #4db2b3, #4a148c, #145aff, #ffffff);
+            background-size: 400% 400%;
+            -webkit-animation: Gradient 15s ease infinite;
+            -moz-animation: Gradient 15s ease infinite;
+            animation: Gradient 15s ease infinite;
+        }
+
+        .glow-border {
+            z-index: 10;
+            position: relative;
+            display: block;
             box-sizing: border-box;
             width: 30px;
             height: 30px;
             margin: 16px;
             border-radius: 50%;
-            opacity: 0.8;
-            /*z-index: 10001;*/
-            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, .4);
         }
 
-        .circle.dark {
-            background: var(--color-one);
-        }
-
-        .circle.light {
-            background: var(--color-three);
-        }
-
-        .circle.complex {
-            background: var(--color-two);
-        }
-
-        @keyframes spin {
+        @-webkit-keyframes Gradient {
             0% {
-                transform: rotate(0deg);
+                background-position: 0% 50%
+            }
+            50% {
+                background-position: 100% 50%
             }
             100% {
-                transform: rotate(360deg);
+                background-position: 0% 50%
             }
         }
 
-        .loading {
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            border: 0.35rem solid white;
-            border-top-color: #ddd;
-            -webkit-animation: spin 1s infinite linear;
-            animation: spin 10s infinite linear;
-            position: relative;
+        @-moz-keyframes Gradient {
+            0% {
+                background-position: 0% 50%
+            }
+            50% {
+                background-position: 100% 50%
+            }
+            100% {
+                background-position: 0% 50%
+            }
         }
 
-        .widget {
-            height: 30px;
-            width: 30px;
+        @keyframes Gradient {
+            0% {
+                background-position: 0% 50%
+            }
+            50% {
+                background-position: 100% 50%
+            }
+            100% {
+                background-position: 0% 50%
+            }
+        }
+        /* border motion */
+
+        @-webkit-keyframes Glow {
+            0% {
+                box-shadow: 1px 1px 20px 0 rgb(74, 20, 140, 1);
+            }
+            50% {
+                box-shadow: 1px 1px 5px 0 rgb(20, 90, 255, 1);
+            }
+            100% {
+                box-shadow: 1px 1px 20px 0 rgb(74, 20, 140, 1);
+            }
+        }
+
+        @-moz-keyframes Glow {
+            0% {
+                box-shadow: 1px 1px 20px 0 rgb(74, 20, 140, 1);
+            }
+            50% {
+                box-shadow: 1px 1px 5px 0 rgb(20, 90, 255, 1);
+            }
+            100% {
+                box-shadow: 1px 1px 20px 0 rgb(74, 20, 140, 1);
+            }
+        }
+
+        @keyframes Glow {
+            0% {
+                box-shadow: 1px 2px 20px 0 rgb(74, 20, 140, 1);
+            }
+            50% {
+                box-shadow: 1px 2px 5px 0 rgb(20, 90, 255, 1);
+            }
+            100% {
+                box-shadow: 1px 2px 20px 0 rgb(74, 20, 140, 1);
+            }
+        }
+
+        .dots {
+            height: 24px;
+            width: 24px;
             position: absolute;
-            top: -3px;
-            left: -3px;
+            top: 4px;
+            left: 3px;
+        }
+
+        .glow-true {
+            box-shadow: 0 0px 30px 0 rgb(74, 20, 140, 1);
+            animation: Glow 5s ease infinite;
+        }
+
+        .semi-show-true {
+            opacity: 0.8;
         }
 
         paper-badge {
@@ -87,9 +156,11 @@
             opacity: 1;
         }
         </style>
-        <div id="spot" class$="circle animated zoomIn show-{{connected}}">
-            <div class="loading">
-                <img class="widget" src="../../images/widget.png" alt="a widget to lunch convospot"></img>
+        <div>
+            <div class$="glow-border glow-{{thinking}}">
+                <div id="spot" class$="circle animated zoomIn show-{{connected}} semi-show-{{thinking}}">
+                    <img class="dots" src="../../images/dots.png" alt="a widget to lunch convospot"></img>
+                </div>
             </div>
         </div>
         <template is="dom-if" if="{{badge}}">
@@ -124,8 +195,24 @@
                     type: Boolean,
                     value: false,
                     notify: true
+                },
+                thinking: {
+                    type: Boolean,
+                    value: true,
+                    notify: true
+                },
+            },
+            ready: function() {
+                if (Spinel.getConfig('debugMode')) {
+                    PubSub.subscribe('debug_simulate', function(topic, data) {
+                        console.log(data);
+                        if (data && data.event === "show_overlay_tour") {
+                            this.message = data.payload;
+                            this.show = true;
+                        }
+                    }.bind(this));
                 }
-            }
+            },
         });
     })();
     </script>
