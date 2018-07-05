@@ -1,14 +1,13 @@
-# Before submitting an issue please read:
+Before submitting an issue:
 
-### https://github.com/Valve/fingerprintjs2/blob/master/FAQ.md
+- Read this: https://github.com/Valve/fingerprintjs2/blob/master/FAQ.md
+- Follow these instructions: https://github.com/Valve/fingerprintjs2/blob/master/CONTRIBUTING.md
 
-### https://github.com/Valve/fingerprintjs2/blob/master/CONTRIBUTING.md
+1) I checked that my issue is not already fixed in GitHub master:
 
-If your issue is about fingerprint changing fast/being inconsistent, please search for already closed issues about it, you may find your answer there.
+2) My fingerprint retrieved with [this jsfiddle](https://jsfiddle.net/L2gLq4rg/) is:
+   ```
+   ...
+   ```
 
-This can be probably because of your browser upgrade (User agent string changing), different screen resolution on various devices (fixable by disabling screen_resolution option).
-
-If you want to submit a bug, please let me know which browser/os you're using and which fingerprinting component is broken and/or different for you on multiple library calls.
-
-
-If you want to ask a question - please use gitter.im (badge is in the readme) and ping me with @valve handle, I'll gladly answer specific questions about the library.
+3) My device is:

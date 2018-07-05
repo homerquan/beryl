@@ -1,6 +1,6 @@
 {
   "name": "emojilib",
-  "version": "2.2.9",
+  "version": "2.2.12",
   "homepage": "https://github.com/muan/emojilib",
   "authors": [
     "Mu-An Chiou <me@muanchiou.com>"
@@ -18,11 +18,11 @@
     "CONTRIBUTING.md",
     "**/.*"
   ],
-  "_release": "2.2.9",
+  "_release": "2.2.12",
   "_resolution": {
     "type": "version",
-    "tag": "2.2.9",
-    "commit": "0c0867e10248623562f2f741a6b12e483eb89afa"
+    "tag": "v2.2.12",
+    "commit": "cd53a25cc07b8aed3f76942bb24013ce1fc2a325"
   },
   "_source": "https://github.com/muan/emojilib.git",
   "_target": "^2.0.2",

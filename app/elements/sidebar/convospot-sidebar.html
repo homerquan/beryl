@@ -79,7 +79,9 @@
         <div id="sidebarContainer" class$="sidebar-container animated bounceInRight show-{{show}}">
             <div><paper-icon-button icon="icons:clear" on-tap="closeSidebar" class="primary big close"></paper-icon-button></div>
             <convospot-sidebar-notice></convospot-sidebar-notice>
-            <!-- <convospot-sidebar-welcome show="[[!messages.length]]"></convospot-sidebar-welcome> -->
+
+            <convospot-sidebar-welcome show="[[!messages.length]]"></convospot-sidebar-welcome>
+            
             <convospot-convo-model id="convModel" items="{{messages}}" convo="[[convo]]"></convospot-convo-model>
             <convospot-convo-view id="convView" model-id="convModel" items="{{messages}}" cid="[[cid]]"></convospot-convo-view>
             <div class="bottom-helper">
@@ -144,6 +146,7 @@
                     observer: '_actMessage'
                 }
             },
+            
             attached: function() {
                 this.socket = document.querySelector('#' + this.socketId);
             },

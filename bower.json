@@ -25,7 +25,8 @@
     "fingerprintjs2": "^1.4.1",
     "iron-scroll-threshold": "^1.0.2",
     "polymer-scroll-threshold": "*",
-    "iron-icons": "^2.0.1"
+    "iron-icons": "^2.0.1",
+    "tether": "^1.4.4"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"

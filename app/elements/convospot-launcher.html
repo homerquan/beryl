@@ -14,8 +14,8 @@
 <link rel="import" href="widget/convospot-widget.html">
 <link rel="import" href="widget/convospot-widget-message.html">
 <link rel="import" href="sidebar/convospot-sidebar.html">
-<!-- Quick demo -->
 <link rel="import" href="overlay/overlay-tour.html">
+<link rel="import" href="overlay/overlay-highlight.html">
 <dom-module id="convospot-launcher">
     <style include="reset-styles"></style>
     <style include="custom-styles"></style>
@@ -25,9 +25,10 @@
         <socket-io id="socketio" socket-version="[[socketVersion]]" socket-url="[[socketUrl]]" socket-path="[[socketPath]]" namespace="[[socketNamespace]]" socket-query="[[socketQuery]]" listen-to="[[listenEvents]]" in-message="{{inMessage}}" out-message="{{outMessage}}" out-event-name="message" connected="{{connected}}" on-s-io-disconnected="_disconnectHandler" on-s-io-reconnect-failed="_reconnectFailedHandler">
         </socket-io>
         <convospot-widget-message id="widget" on-tap="" connected="{{connected}}" convo="{{convo}}" new-message="{{newMessage}}"></convospot-widget-message>
-        <convospot-widget id="widget" on-tap="toggleSidebar" connected="{{connected}}" cid="{{cid}}" badge="{{newMessageCounter}}"></convospot-widget>
+        <convospot-widget id="widget" on-tap="toggleSidebar" connected="{{connected}}" cid="{{cid}}" badge="{{newMessageCounter}}" thinking="{{thinking}}" training="{{training}}"></convospot-widget>
         <convospot-sidebar class="cleanslate" id="sidebar" show="{{showSidebar}}" connected="{{connected}}" socket-id="socketio" bid="[[bid]]" convo="[[convo]]" visitor="[[visitor]]" jwt-token="[[jwtToken]]" new-message-counter="{{newMessageCounter}}" new-message="{{newMessage}}" in-message={{inMessage]]></convospot-sidebar>
         <overlay-tour></overlay-tour>
+        <overlay-highlight></overlay-highlight>
     </template>
 </dom-module>
 <script>
@@ -51,6 +52,14 @@ Polymer({
             notify: true
         },
         error: {
+            type: Object,
+            value: {},
+            notify: true
+        },
+        /**
+         * Session context
+         */
+        context: {
             type: Object,
             value: {},
             notify: true
@@ -97,7 +106,17 @@ Polymer({
             type: Object,
             value: null,
             notify: true
-        }
+        },
+        thinking: {
+            type: Boolean,
+            value: false,
+            notify: true
+        },
+        training: {
+            type: Boolean,
+            value: false,
+            notify: true
+        },
     },
 
     /**
@@ -116,8 +135,8 @@ Polymer({
             console.error(err);
         });
 
-        PubSub.subscribe('convospot_analytics',function(topic,data){
-            this.$.socketio.emit('analytics',data);
+        PubSub.subscribe('convospot_analytics', function(topic, data) {
+            this.$.socketio.emit('analytics', data);
         }.bind(this));
 
         PubSub.subscribe(Spinel.Constant.AUTH_SUCCESS, function() {
@@ -126,8 +145,8 @@ Polymer({
             if (currentConvo && currentVisitor) {
                 this.convo = currentConvo;
                 this.visitor = currentVisitor;
-                console.log("Join conversation:"+this.convo.id);
-                console.log("As visitor:"+this.visitor.id);
+                console.log("Join conversation:" + this.convo.id);
+                console.log("As visitor:" + this.visitor.id);
                 this.$.session.replaceJwtToken().then(function() {
                         this.$.socketio.connect();
                         // Make api call to fill previous messages
@@ -147,6 +166,23 @@ Polymer({
         PubSub.subscribe(Spinel.Constant.SIO_CONNECT, function() {
             this.$.socketio.connect();
         }.bind(this));
+
+        if (Spinel.getConfig('debugMode')) {
+            PubSub.subscribe('debug_simulate', function(topic, data) {
+                if (data && data.event === "add_message") {
+                    console.log(data);
+                    this.inMessage = data.payload;
+                }
+                if (data && data.event === "change_thinking") {
+                    console.log(data);
+                    this.thinking = data.payload;
+                }
+                if (data && data.event === "change_training") {
+                    console.log(data);
+                    this.training = data.payload;
+                }
+            }.bind(this));
+        }
     },
 
     toggleSidebar: function() {

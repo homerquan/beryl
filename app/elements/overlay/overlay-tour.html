@@ -1,6 +1,7 @@
 <!-- this is the entry point for selected card -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../styles/custom-styles.html">
 <link rel="import" href="../../styles/share-styles.html">
 <link rel="import" href="../core/cache.html">
@@ -17,7 +18,7 @@
         left: 0;
         top: 0;
         background-color: rgb(0,0,0); /* Black fallback color */
-        background-color: rgba(0,0,0, 0.8); /* Black w/opacity */
+        background-color: rgba(0,0,0, 0.5); /* Black w/opacity */
         overflow-x: hidden; /* Disable horizontal scroll */
         transition: 0.5s; 
         z-index: 9997;
@@ -68,12 +69,21 @@
         right: 0;
     }
 
+    paper-button.green {
+      background-color: var(--paper-green-500);
+      color: white;
+      padding: 0.2em 0.2em;
+    }
     </style>
     <template>
         <template is="dom-if" if="{{show}}">
         <div class="overlay-background">
             <div class="message-container">
                 <p>{{message}}</p>
+                <div>
+                    <paper-button raised class="green">YES</paper-button>
+                    <paper-button raised class="green">NO</paper-button>
+                </div>
                 <div class="message-control"><paper-icon-button icon="icons:clear" on-tap="_close" class="primary close">Close</paper-icon-button></div>
             </div>
         </div>
@@ -108,8 +118,8 @@
         ready: function() {
           if (Spinel.getConfig('debugMode')) {
             PubSub.subscribe('debug_simulate',function(topic,data){
-                console.log(data);
                if(data && data.event==="show_overlay_tour") {
+                 console.log(data);
                  this.message = data.payload;
                  this.show = true;
                }

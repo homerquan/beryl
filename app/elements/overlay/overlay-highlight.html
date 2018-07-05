@@ -1,0 +1,110 @@
+<!-- this is the entry point for selected card -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<link rel="import" href="../core/cache.html">
+<dom-module id="overlay-highlight">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <style>
+     .overlay-background {
+        height: 100%;
+        width: 100%;
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        background-color: rgb(0,0,0); /* Black fallback color */
+        background-color: rgba(0,0,0, 0.3); /* Black w/opacity */
+        overflow-x: hidden; /* Disable horizontal scroll */
+        transition: 0.5s; 
+        z-index: 9997;
+        mix-blend-mode: multiply;
+    }    
+    .highlight-container {
+        position: fixed;
+        z-index: 102;
+    }
+    .reflen-highlight {
+        background: white;
+    }
+    .reflen-highlight-content {
+        background: #115bff;
+        color: white;
+        position: fixed; /* Stay in place */
+        z-index: 9998; /* Sit on top */
+        padding: 15px
+    }
+    </style>
+    <template>
+        <template is="dom-if" if="{{show}}">
+          <div class="overlay-background">  
+            <div class="highlight-container" style$="top:{{rect.top}}px;left:{{rect.left}}px;">
+                <div class="reflen-highlight" style$="width:{{rect.width}}px;height:{{rect.height}}px"></div>
+            </div>
+           </div> 
+           <div class="reflen-highlight-content" style$="top:{{rect.bottom}}px;left:{{rect.left}}px;">
+                <div>{{message}}</div>
+            </div>
+        </template>
+    </template>
+</dom-module>
+<script>
+(function() {
+    'use strict';
+    Polymer({
+        is: 'overlay-highlight',
+        behaviors: [
+            Spinel.Base,
+            Spinel.Cache
+        ],
+        listeners: {
+            "tap":"_close"
+        },
+        properties: {
+            show: {
+                type: Boolean,
+                value: false
+            },
+            message: {
+                type: String,
+                value: ''
+            },
+            ignore: {
+                type: Boolean,
+                value: false
+            },
+            rect: {
+                type: Object,
+                value: ''
+            }
+        },
+
+        ready: function() {
+            if (Spinel.getConfig('debugMode')) {
+                PubSub.subscribe('debug_simulate', function(topic, data) {
+                    if (data && data.event === "show_overlay_highlight") {
+                        console.log(data);
+                        var target = document.querySelector(data.payload.el);
+                        var rect = target.getBoundingClientRect();
+                        this.rect = rect;
+                        this.message = data.payload.message;
+                        this.show = true;
+
+                    }
+                }.bind(this));
+            }
+            window.onscroll = function() { this.show = false; }.bind(this);
+        },
+
+        _getShow: function() {
+            return true;
+        },
+
+        _close: function() {
+            this.show = false;
+        },
+    });
+})();
+</script>

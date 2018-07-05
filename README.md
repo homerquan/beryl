@@ -80,10 +80,13 @@ Build and optimize the current project, ready for deployment. This includes vulc
 
 ## Debug
 
-In console
+In console, typing in simulation events:
 
-``PubSub.publish("debug_simulate",{"event":"show_overlay_tour","payload":"Are you interested in participate our early adoption program?"})``
-
+* ``PubSub.publish("debug_simulate",{"event":"show_overlay_tour","payload":"Are you interested in participate our early adoption program?"})``
+* ``PubSub.publish("debug_simulate",{"event":"change_thinking","payload":true})``
+* ``PubSub.publish("debug_simulate",{"event":"change_training","payload":true})``
+* ``PubSub.publish("debug_simulate",{"event":"add_message","payload":{"event":"create_message", "data":{"id":"abc","modelName":"message","source":"ai","text":"test","acknlwedged":true,"type":"language"}}})``
+* ``PubSub.publish("debug_simulate",{"event":"show_overlay_highlight","payload":{"el":".g-logo-helium","message":"highlight something"}})``
 
 ## Application Theming & Styling
 

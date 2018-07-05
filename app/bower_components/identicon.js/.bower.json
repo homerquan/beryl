@@ -4,7 +4,7 @@
     "pnglib.js",
     "identicon.js"
   ],
-  "version": "2.3.1",
+  "version": "2.3.2",
   "homepage": "https://github.com/stewartlord/identicon.js",
   "authors": [
     "stewartlord"
@@ -17,11 +17,11 @@
     "identicon"
   ],
   "license": "BSD",
-  "_release": "2.3.1",
+  "_release": "2.3.2",
   "_resolution": {
     "type": "version",
-    "tag": "2.3.1",
-    "commit": "4904e7d48eec01ce2ca2f0d4edb6f38c5b06fd91"
+    "tag": "2.3.2",
+    "commit": "acd9273d211dc4e6860d34a8396b750d484d40a9"
   },
   "_source": "https://github.com/stewartlord/identicon.js.git",
   "_target": "*",

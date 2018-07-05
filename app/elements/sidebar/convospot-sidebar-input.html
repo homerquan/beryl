@@ -13,6 +13,18 @@
     <style include="custom-styles"></style>
     <style include="share-styles"></style>
     <style>
+    :root {
+        --paper-input-container-underline: {
+            display: none;
+        }
+        --paper-input-container-underline-focus: {
+            display: none;
+        }
+        --paper-input-container-underline-disabled: {
+            display: none;
+        }
+    }
+
     .message-input {
         width: 100%;
         margin: 0;
@@ -46,7 +58,7 @@
         position: absolute;
         background: white;
         width: 100%;
-        min-height: 80px;
+        min-height: 100px;
         bottom: 0;
     }
 
@@ -54,10 +66,6 @@
         padding: 0 10px;
         margin-right: 40px;
         margin-bottom: 10px;
-    }
-
-    paper-textarea /deep/ .underline {
-        display: none;
     }
 
     paper-textarea /deep/ paper-input-char-counter {
@@ -76,12 +84,12 @@
         </paper-button>
         <div class$="input-container show-{{opened}} animated slideInUp">
             <div class="input-control">
-                <paper-icon-button icon="hardware:keyboard-hide" on-tap="_closeInput" class="close x-small"></paper-icon-button>
-                <paper-icon-button id="sendButton" icon="icons:send" on-tap="_send" class="send small"></paper-icon-button>
+                <paper-icon-button icon="hardware:keyboard-hide" on-tap="_closeInput" class="close x-small primary"></paper-icon-button>
+                <paper-icon-button id="sendButton" icon="icons:send" on-tap="_send" class="send small primary"></paper-icon-button>
             </div>
             <div class="relative-helper">
                 <paper-tooltip for="sendButton" position="top">Shortcut "shift+enter"</paper-tooltip>
-                <paper-textarea id="messageInput" class="input-area" rows="2" max-rows="2" value="{{message}}" placeholder="Type your message" disabled$="{{!connected}}" no-label-float="true" autofocus focused char-counter maxlength="128"></paper-textarea>
+                <paper-textarea id="messageInput" class="input-area" rows="2" max-rows="2" value="{{message}}" placeholder="Type your message, press shift+enter to send" disabled$="{{!connected}}" no-label-float="true" autofocus focused char-counter maxlength="128"></paper-textarea>
             </div>
         </div>
     </template>
@@ -130,9 +138,9 @@
                 let msg = {
                     type: 'language',
                     text: text,
-                    source : 'visitor',
-                    sourceId : this.visitor.id,
-                    conversation : this.convo.id
+                    source: 'visitor',
+                    sourceId: this.visitor.id,
+                    conversation: this.convo.id
                 };
                 this.create('messages', msg, this.jwtToken).then(function(resp) {
                     if (this.checkResp(resp)) {

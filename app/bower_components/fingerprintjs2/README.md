@@ -1,6 +1,13 @@
 # Fingerprintjs2
+
 [![](https://travis-ci.org/Valve/fingerprintjs2.svg?branch=master)](https://travis-ci.org/Valve/fingerprintjs2)
 [![](https://badges.gitter.im/Valve/fingerprintjs2.svg)](https://gitter.im/Valve/fingerprintjs2)
+
+## FingerprintJS PRO - [https://fingerprintjspro.com](https://fingerprintjspro.com/#contact)
+
+Professional version for state of the art identification. Contact for early access.
+
+--------------------------
 
 Original fingerprintjs library was developed in 2012, it's now impossible to evolve it
 without breaking backwards compatibilty, so this project will be where
@@ -18,47 +25,32 @@ fingerprintjs.
 
 This project uses `semver`.
 
-### Installation
+## Installation
 
-#### CDN:
-```
-//cdn.jsdelivr.net/fingerprintjs2/<VERSION>/fingerprint2.min.js
-```
-or
-
-```
-https://cdnjs.com/libraries/fingerprintjs2
-```
-
-#### Bower
-
-```
-bower install fingerprintjs2
-```
-
-#### NPM
-
-```
-npm install fingerprintjs2
-```
+- CDN: `//cdn.jsdelivr.net/npm/fingerprintjs2@<VERSION>/dist/fingerprint2.min.js` or `https://cdnjs.com/libraries/fingerprintjs2`
+- Bower: `bower install fingerprintjs2`
+- NPM: `npm install fingerprintjs2`
+- Yarn: `yarn add fingerprintjs2`
 
 
-### Usage
+## Usage
 
 ```js
-new Fingerprint2().get(function(result, components){
-  console.log(result); //a hash, representing your device fingerprint
-  console.log(components); // an array of FP components
-});
+new Fingerprint2().get(function(result, components) {
+  console.log(result) // a hash, representing your device fingerprint
+  console.log(components) // an array of FP components
+})
 ```
+
+**Note:** You should not run fingerprinting directly on or after page load. Rather, delay it for a few milliseconds to ensure consistent fingerprints. See [#307](https://github.com/Valve/fingerprintjs2/issues/307), [#254](https://github.com/Valve/fingerprintjs2/issues/254), and others.
 
 #### You can pass an object with options (all of which are optional):
 
 ```js
-var options = {swfPath: '/assets/FontList.swf', excludeUserAgent: true};
-new Fingerprint2(options).get(function(result){
-  console.log(result);
-});
+var options = {swfPath: '/assets/FontList.swf', excludeUserAgent: true}
+new Fingerprint2(options).get(function(result) {
+  console.log(result)
+})
 ```
 
 Full list of options will be in the
@@ -90,24 +82,46 @@ devices.
 ##### All fingerprinting sources are enabled by default, i.e. you don't need to explicitly configure the library to include them.
 
 ```js
-new Fingerprint2().get(function(result, components){
+new Fingerprint2().get(function(result, components) {
   // this will use all available fingerprinting sources
-  console.log(result);
+  console.log(result)
   // components is an array of all fingerprinting components used
-  console.log(components);
-});
+  console.log(components)
+})
 ```
 
 #### `userDefinedFonts` option
 
-While hundreds of the most popular fonts are included in the extended font list, you may wish to increase the entropy of the font fingerprint by specifying the `userDefinedFonts` option as an array of font names.
+While hundreds of the most popular fonts are included in the extended font list, you may wish to increase the entropy of the font fingerprint by specifying the `userDefinedFonts` option as an array of font names, **but make sure to call the Fingerprint function after the page load, and not before**, otherwise font detection might not work properly and in a result returned hash might be different every time you reloaded the page.
 
-```
+```js
 new Fingerprint2({
   userDefinedFonts: ["Nimbus Mono", "Junicode", "Presto"]
-}).get(function(result, components){}
-  console.log(result);
-);
+}).get(function(result, components) {
+  console.log(result)
+})
+```
+
+#### `preprocessor` option
+
+Function that is called with each component value that may be used to modify component values before computing the fingerprint.
+For example: strip browser version from user agent.
+
+```js
+new Fingerprint2({
+  preprocessor: function(key, value) {
+    if (key == "user_agent") {
+      var parser = new UAParser(value); // https://github.com/faisalman/ua-parser-js
+      var userAgentMinusVersion = parser.getOS().name + ' ' + parser.getBrowser().name
+      return userAgentMinusVersion
+    } else {
+      return value
+    }
+  }
+}).get(function(result, components) {
+  // user_agent component will contain string processed with our function. For example: Windows Chrome
+  console.log(result, components)
+});
 ```
 
 #### View the fingerprint locally
@@ -123,15 +137,15 @@ To start a web server you can try using one of the following:
 
 * Python 2.x
 
-	`python -m SimpleHTTPServer 8080`
+    `python -m SimpleHTTPServer 8080`
 
 * Python 3.x
 
-	`python -m http.server 8080`
+    `python -m http.server 8080`
 
 * PHP 5.4+
 
-	`php -S 0.0.0.0:8080`
+    `php -S 0.0.0.0:8080`
 
 
 ### List of fingerprinting sources
@@ -162,13 +176,16 @@ To start a web server you can try using one of the following:
 24. Touch screen detection and capabilities
 25. Pixel Ratio
 26. System's total number of logical processors available to the user agent.
+27. [Device memory](https://w3c.github.io/device-memory/)
 
 
 By default, JS font detection will only detect up to 65 installed fonts. If you want to improve the font detection,
 you can pass `extendedJsFonts: true` option. This will increase the number of detectable fonts to ~500.
 
-On my machine (MBP 2013 Core i5) + Chrome 46 the default FP process takes about 80-100ms. If you use `extendedJsFonts` option this time will increase up to 160-200ms.
+On my machine (MBP 2013 Core i5) + Chrome 46 the default FP process takes about 80-100ms. If you use `extendedJsFonts` option this time will increase up to 2000ms (cold font cache).
 This option can incur even more overhead on mobile Firefox browsers, which is much slower in font detection, so use it with caution on mobile devices.
+
+To speed up fingerprint computation, you can exclude font detection (~ 40ms), canvas fingerprint (~ 10ms), and WebGL fingerprint (~ 35 ms).
 
 ### Many more fingerprinting sources will be implemented, such as
 (in no particular order)

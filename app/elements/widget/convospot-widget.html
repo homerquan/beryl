@@ -149,16 +149,35 @@
         paper-badge {
             left: 35px !important;
             top: 10px !important;
+            opacity: 1.0;
+            z-index: 11;
             --paper-badge-background: var(--paper-light-blue-300);
         }
 
         .circle:hover {
             opacity: 1;
         }
+
+        .get-message-true {
+            opacity: 1;
+        }
+
+        .training-box {
+            position: absolute;
+            bottom: 0;
+            font-size: 0.65rem;
+            background: #4db2b3;
+            padding: 3px;
+            line-height: 0.5rem;
+            font-weight: bolder;
+            color: white;
+            border-radius: 7px;
+            right: 7px;
+        }
         </style>
         <div>
             <div class$="glow-border glow-{{thinking}}">
-                <div id="spot" class$="circle animated zoomIn show-{{connected}} semi-show-{{thinking}}">
+                <div id="spot" class$="circle animated zoomIn show-{{connected}} semi-show-{{thinking}} get-message-{{_getMessage(badge)}}">
                     <img class="dots" src="../../images/dots.png" alt="a widget to lunch convospot"></img>
                 </div>
             </div>
@@ -166,6 +185,9 @@
         <template is="dom-if" if="{{badge}}">
             <paper-badge label="{{badge}}" role="status" aria-label="{{badge}}">
             </paper-badge>
+        </template>
+        <template is="dom-if" if="{{training}}">
+            <div class="training-box">Learning</div>
         </template>
     </template>
     <script>
@@ -198,19 +220,20 @@
                 },
                 thinking: {
                     type: Boolean,
-                    value: true,
+                    value: false,
+                    notify: true
+                },
+                training: {
+                    type: Boolean,
+                    value: false,
                     notify: true
                 },
             },
-            ready: function() {
-                if (Spinel.getConfig('debugMode')) {
-                    PubSub.subscribe('debug_simulate', function(topic, data) {
-                        console.log(data);
-                        if (data && data.event === "show_overlay_tour") {
-                            this.message = data.payload;
-                            this.show = true;
-                        }
-                    }.bind(this));
+            _getMessage: function(counter) {
+                if (counter > 0) {
+                    return true
+                } else {
+                    return false;
                 }
             },
         });

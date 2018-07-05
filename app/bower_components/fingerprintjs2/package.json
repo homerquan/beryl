@@ -1,18 +1,7 @@
 {
   "name": "fingerprintjs2",
-  "version": "1.5.0",
+  "version": "1.8.0",
   "description": "Modern & flexible browser fingerprinting library",
-  "main": "dist/fingerprint2.min.js",
-  "devDependencies": {
-    "gulp": "^3.8.11",
-    "eslint": "^0.14.1",
-    "gulp-eslint": "^0.4.2",
-    "gulp-rename": "^1.2.2",
-    "gulp-uglify": "^1.1.0"
-  },
-  "scripts": {
-    "test": "specs/phantomjs.runner.sh specs/spec_runner.html"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Valve/fingerprintjs2.git"
@@ -29,5 +18,24 @@
   "bugs": {
     "url": "https://github.com/Valve/fingerprintjs2/issues"
   },
-  "homepage": "https://github.com/Valve/fingerprintjs2"
+  "homepage": "https://github.com/Valve/fingerprintjs2",
+  "main": "dist/fingerprint2.min.js",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-standard": "^10.1.1",
+    "gulp-uglify": "^3.0.0",
+    "standard": "^10.0.3"
+  },
+  "scripts": {
+    "test": "specs/phantomjs.runner.sh specs/spec_runner.html",
+    "gulp": "gulp",
+    "lint": "standard --fix"
+  },
+  "standard": {
+    "ignore": [
+      "specs/lib",
+      "specs/phantomjs-testrunner.js"
+    ]
+  }
 }
