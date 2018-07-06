@@ -16,6 +16,7 @@
 <link rel="import" href="sidebar/convospot-sidebar.html">
 <link rel="import" href="overlay/overlay-tour.html">
 <link rel="import" href="overlay/overlay-highlight.html">
+<link rel="import" href="console/train-console.html">
 <dom-module id="convospot-launcher">
     <style include="reset-styles"></style>
     <style include="custom-styles"></style>
@@ -26,9 +27,10 @@
         </socket-io>
         <convospot-widget-message id="widget" on-tap="" connected="{{connected}}" convo="{{convo}}" new-message="{{newMessage}}"></convospot-widget-message>
         <convospot-widget id="widget" on-tap="toggleSidebar" connected="{{connected}}" cid="{{cid}}" badge="{{newMessageCounter}}" thinking="{{thinking}}" training="{{training}}"></convospot-widget>
-        <convospot-sidebar class="cleanslate" id="sidebar" show="{{showSidebar}}" connected="{{connected}}" socket-id="socketio" bid="[[bid]]" convo="[[convo]]" visitor="[[visitor]]" jwt-token="[[jwtToken]]" new-message-counter="{{newMessageCounter}}" new-message="{{newMessage}}" in-message={{inMessage]]></convospot-sidebar>
+        <convospot-sidebar class="cleanslate" id="sidebar" show="{{showSidebar}}" connected="{{connected}}" socket-id="socketio" bid="[[bid]]" convo="[[convo]]" visitor="[[visitor]]" jwt-token="[[jwtToken]]" new-message-counter="{{newMessageCounter}}" new-message="{{newMessage}}" in-message="{{inMessage}}" training="{{training}}" show-console="{{showConsole}}"></convospot-sidebar>
         <overlay-tour></overlay-tour>
         <overlay-highlight></overlay-highlight>
+        <train-console show="{{showConsole}}"></train-console>
     </template>
 </dom-module>
 <script>
@@ -79,6 +81,11 @@ Polymer({
             observer: '_changeConnection'
         },
         showSidebar: {
+            type: Boolean,
+            value: false,
+            notify: true
+        },
+        showConsole: {
             type: Boolean,
             value: false,
             notify: true

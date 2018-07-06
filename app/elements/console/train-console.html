@@ -1,0 +1,91 @@
+<!-- this is the entry point for selected card -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<link rel="import" href="../core/cache.html">
+<dom-module id="train-console">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <style>
+
+       
+
+    .console-container {
+        bottom: 20px;
+        position: fixed;
+        color: white;
+        z-index: 9999;
+        background: #eee;
+        height:  calc(100% - 40px);
+        width: 400px;
+        left: 20px;
+        border-radius: 10px;
+        padding: 15px 20px;
+    }
+
+    .console-control {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+   
+    </style>
+    <template>
+        <template is="dom-if" if="{{show}}">
+            show context, intention, actions
+            <div class="console-container">
+                <div class="console-control"><paper-icon-button icon="icons:clear" on-tap="_close" class="primary">Close</paper-icon-button></div>
+            </div>
+
+        </template>
+    </template>
+</dom-module>
+<script>
+(function() {
+    'use strict';
+    Polymer({
+        is: 'train-console',
+        behaviors: [
+            Spinel.Base,
+            Spinel.Cache
+        ],
+        listeners: {},
+        properties: {
+            show: {
+                type: Boolean,
+                value: false
+            },
+            message: {
+                type: String,
+                value: ''
+            },
+            ignore: {
+                type: Boolean,
+                value: false
+            }
+        },
+
+        ready: function() {
+          if (Spinel.getConfig('debugMode')) {
+            PubSub.subscribe('debug_simulate',function(topic,data){
+               if(data && data.event==="change_train_console") {
+                 console.log(data);
+                 this.show  = data.payload;
+               }
+            }.bind(this));
+          }        
+        },
+
+        _getShow: function() {
+           return true;
+        },
+
+        _close: function() {
+            this.show=false;
+        }
+    });
+})();
+</script>

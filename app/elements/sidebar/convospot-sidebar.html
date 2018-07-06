@@ -16,10 +16,10 @@
     <style include="share-styles"></style>
     <template>
         <style>
-        :host {
+         :host {
             --paper-toolbar-height: 52px;
         }
-        
+
         paper-toolbar {
             background: var(--convospot-bg-color);
         }
@@ -35,14 +35,14 @@
             box-shadow: 0 0 4px 1px rgba(0, 0, 0, .08);
             z-index: 9999;
         }
-        
+
         paper-card {
             box-shadow: none;
             border: solid 1px #70b1e7;
             border-radius: 6px;
             margin: 0 2px;
         }
-        
+
         paper-toast {
             margin-top: 52px;
             top: 0px;
@@ -52,18 +52,18 @@
             border-radius: 0;
             margin: 0;
         }
-        
+
         @media (max-width: 460px) {
             .sidebar-container {
                 width: auto;
                 left: 0;
             }
         }
-        
+
         convospot-convo-view {
             margin-bottom: 52px;
         }
-        
+
         .bottom-helper {
             background: white;
             width: 100%;
@@ -75,18 +75,45 @@
             height: 45px;
             width: 45px;
         }
+
+        .power {
+            position: absolute;
+            bottom: 0;
+            right: 4px;
+            font-size: 10px;
+        }
+
+        .training-box {
+            position: absolute;
+            top: 2px;
+            font-size: 0.8rem;
+            background: #9013FE;
+            padding: 0px;
+            line-height: 0.5rem;
+            font-weight: bolder;
+            color: white;
+            border-radius: 7px;
+            right: 2px;
+            padding-left: 10px;
+        }
         </style>
         <div id="sidebarContainer" class$="sidebar-container animated bounceInRight show-{{show}}">
-            <div><paper-icon-button icon="icons:clear" on-tap="closeSidebar" class="primary big close"></paper-icon-button></div>
+            <div>
+                <template is="dom-if" if="{{training}}">
+                    <div class="training-box">Learning
+                        <paper-icon-button icon="icons:view-list" on-tap="_toggleConsole" style="color: white;"></paper-icon-button>
+                    </div>
+                </template>
+                <paper-icon-button icon="icons:clear" on-tap="closeSidebar" class="primary big close"></paper-icon-button>
+            </div>
             <convospot-sidebar-notice></convospot-sidebar-notice>
-
             <convospot-sidebar-welcome show="[[!messages.length]]"></convospot-sidebar-welcome>
-            
             <convospot-convo-model id="convModel" items="{{messages}}" convo="[[convo]]"></convospot-convo-model>
             <convospot-convo-view id="convView" model-id="convModel" items="{{messages}}" cid="[[cid]]"></convospot-convo-view>
             <div class="bottom-helper">
                 <convospot-sidebar-input connected="[[connected]]" convo="[[convo]]" visitor="[[visitor]]" jwt-token="[[jwtToken]]" on-message-send="_sendMessage"></convospot-sidebar-input>
                 <!-- <convospot-convo-input id="convoInput" model-id="convModel" message="{{inMessage}}" on-send="sendMessage" cid="[[cid]]"></convospot-convo-input> -->
+                <div class="power">Power by Reflen</div>
             </div>
         </div>
     </template>
@@ -136,6 +163,11 @@
                     value: 0,
                     notify: true
                 },
+                training: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                },
                 show: {
                     type: Boolean,
                     value: false,
@@ -144,19 +176,24 @@
                 },
                 inMessage: {
                     observer: '_actMessage'
-                }
+                },
+                showConsole: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                },
             },
-            
+
             attached: function() {
                 this.socket = document.querySelector('#' + this.socketId);
             },
             ready: function() {
-               
+
             },
             closeSidebar: function() {
                 this.show = false;
             },
-           
+
             // receiveSaveMessage: function(msg) {
             //     if (msg) {
             //         this.$.convModel.newItem(msg);
@@ -244,7 +281,7 @@
 
                             this.$.convView.showSpinner = false;
 
-                            PubSub.subscribe('convo-item-attached',function() {
+                            PubSub.subscribe('convo-item-attached', function() {
                                 //this.$.convView.showSpinner = false;
                             }.bind(this));
                         }
@@ -259,6 +296,10 @@
                 // if (msg && msg.event === 'message:remove:' + this.cid) {
                 //     this.$.sidebar.receiveRemoveMessage(msg.data);
                 // }
+            },
+
+            _toggleConsole: function() {
+                this.showConsole = ! this.showConsole;
             },
         });
     })();

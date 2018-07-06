@@ -69,6 +69,18 @@
         right: 0;
     }
 
+    .message-action {
+        position: absolute;
+        bottom: 19px;
+    }
+
+    .power {
+            position: absolute;
+            bottom: 0;
+            right: 4px;
+            font-size: 10px;
+        }
+
     paper-button.green {
       background-color: var(--paper-green-500);
       color: white;
@@ -80,11 +92,12 @@
         <div class="overlay-background">
             <div class="message-container">
                 <p>{{message}}</p>
-                <div>
-                    <paper-button raised class="green">YES</paper-button>
-                    <paper-button raised class="green">NO</paper-button>
+                <div class="message-action">
+                    <paper-button raised class="green">Proceed</paper-button>
+                    <paper-button raised class="green">Cancel</paper-button>
                 </div>
-                <div class="message-control"><paper-icon-button icon="icons:clear" on-tap="_close" class="primary close">Close</paper-icon-button></div>
+                <div class="message-control"><paper-icon-button icon="icons:clear" on-tap="_close" class="primary" style="color:white">Close</paper-icon-button></div>
+                <div class="power">Power by Reflen</div>
             </div>
         </div>
         </template>
