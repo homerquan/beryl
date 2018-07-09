@@ -8,7 +8,6 @@
 const $ = require("./libs/dollar").$;
 const express = require("express");
 const http = require("http");
-const https = require("https");
 const cors = require("cors");
 const fs = require("fs");
 
@@ -21,20 +20,7 @@ app.use(cors());
 app.use(express.static("app"));
 require("./config/convospot.config")(app, $("config"));
 require("./config/spinel.config")(app, $("config"));
-
-// Overwrite config.html in dev env
-if (
-	process.env.NODE_ENV === "development" ||
-	process.env.NODE_ENV === "stage"
-) {
-	var server = http.createServer(app);
-} else if (process.env.NODE_ENV === "production") {
-	var options = {
-		key: fs.readFileSync($('config').key),
-		cert: fs.readFileSync($('config').cert)
-	};
-	var server = https.createServer(options, app);
-}
+var server = http.createServer(app);
 
 // Start server
 function startServer() {
