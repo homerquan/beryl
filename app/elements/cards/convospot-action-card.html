@@ -1,6 +1,7 @@
 <!-- this is the entry point for selected card -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="./user-profile-card.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../styles/custom-styles.html">
 <link rel="import" href="../../styles/share-styles.html">
 <dom-module id="convospot-action-card">
@@ -26,6 +27,8 @@
                 <user-profile-card context="[[context]]"></user-profile-card>
             </template>
         </template>
+        <!-- demo only -->
+        <paper-button class="primary small">{{item.text}}</paper-button>
     </template>
 </dom-module>
 <script>
