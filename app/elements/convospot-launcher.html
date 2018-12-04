@@ -187,6 +187,9 @@ Polymer({
                 if (data && data.event === "change_training") {
                     console.log(data);
                     this.training = data.payload;
+                    if(this.training) {
+                        this.showConsole = true;
+                    }
                 }
                 if (data && data.event === "change_console") {
                     console.log(data);
