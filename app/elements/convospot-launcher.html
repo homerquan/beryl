@@ -188,6 +188,10 @@ Polymer({
                     console.log(data);
                     this.training = data.payload;
                 }
+                if (data && data.event === "change_console") {
+                    console.log(data);
+                    this.showConsole = data.payload;
+                }
             }.bind(this));
         }
     },
