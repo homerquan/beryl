@@ -30,14 +30,14 @@ The full starter kit requires the following major dependencies:
 node --version
 ```
 
-The version should be at or above 0.12.x.
+The version should be at or above 8.x.
 
 2)  If you don't have Node.js installed, or you have a lower version, go to [nodejs.org](https://nodejs.org) and click on the big green Install button.
 
 3)  Install `gulp` and `bower` globally.
 
 ```sh
-npm install -g gulp bower
+
 ```
 
 This lets you run `gulp` and `bower` from the command line.
