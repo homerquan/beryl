@@ -3,10 +3,10 @@
 // Development specific configuration
 // ==================================
 module.exports = {
-    port: 8005,
-    ip: '0.0.0.0',
-	debugMode: true,
-	widgetUrl: 'http://localhost:8005',
-	socketUrl: 'http://localhost:8004',
-	apiUrl: 'http://localhost:8001/v2'
+  port: 8005,
+  ip: '0.0.0.0',
+  debugMode: true,
+  widgetUrl: 'http://widget.dev.reflen.com',
+  socketUrl: 'http://socket.dev.reflen.com',
+  apiUrl: 'http://api.dev.reflen.com/v2',
 };
