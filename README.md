@@ -29,7 +29,7 @@ The full starter kit requires the following major dependencies:
 node --version
 ```
 
-The version should be at or above 8.x.
+The version should be at or above 8.x.x
 
 2)  If you don't have Node.js installed
 
@@ -51,14 +51,12 @@ This installs the element sets (Paper, Iron, Platinum) and tools the starter kit
 
 
 
-
-
 ### Development workflow
 
 #### Serve / watch
 
 ```sh
-gulp serve
+npm run dev
 ```
 
 This outputs an IP address you can use to locally test and another that can be used on devices connected to your network.
