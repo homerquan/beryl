@@ -13,7 +13,8 @@
 <link rel="import" href="services/session.html">
 <link rel="import" href="widget/convospot-widget.html">
 <link rel="import" href="widget/convospot-widget-message.html">
-<link rel="import" href="sidebar/convospot-sidebar.html">
+<link rel="import" href="widget/convospot-widget-auth.html">
+<link rel="import" href="smartconvo/convospot-sidebar.html">
 <link rel="import" href="overlay/overlay-tour.html">
 <link rel="import" href="overlay/overlay-highlight.html">
 <link rel="import" href="console/train-console.html">
@@ -25,12 +26,14 @@
         <convospot-session id="session" has-auth="{{hasAuth}}" jwt-token="{{jwtToken}}" bid="[[bid]]" token="[[token]]" convo="[[convo]]"></convospot-session>
         <socket-io id="socketio" socket-version="[[socketVersion]]" socket-url="[[socketUrl]]" socket-path="[[socketPath]]" namespace="[[socketNamespace]]" socket-query="[[socketQuery]]" listen-to="[[listenEvents]]" in-message="{{inMessage}}" out-message="{{outMessage}}" out-event-name="message" connected="{{connected}}" on-s-io-disconnected="_disconnectHandler" on-s-io-reconnect-failed="_reconnectFailedHandler">
         </socket-io>
-        <convospot-widget-message id="widget" on-tap="" connected="{{connected}}" convo="{{convo}}" new-message="{{newMessage}}"></convospot-widget-message>
+        <convospot-widget-message id="widgetMessage" on-tap="" connected="{{connected}}" convo="{{convo}}" new-message="{{newMessage}}"></convospot-widget-message>
+        <convospot-widget-auth id="widgetAuth" training="{{training}}"></convospot-widget-auth>
         <convospot-widget id="widget" on-tap="toggleSidebar" connected="{{connected}}" cid="{{cid}}" badge="{{newMessageCounter}}" thinking="{{thinking}}" training="{{training}}"></convospot-widget>
-        <convospot-sidebar class="cleanslate" id="sidebar" show="{{showSidebar}}" connected="{{connected}}" socket-id="socketio" bid="[[bid]]" convo="[[convo]]" visitor="[[visitor]]" jwt-token="[[jwtToken]]" new-message-counter="{{newMessageCounter}}" new-message="{{newMessage}}" in-message="{{inMessage}}" training="{{training}}" show-console="{{showConsole}}"></convospot-sidebar>
+        <!-- quick demo, will using a fascade or adaptor later -->
+        <convospot-sidebar class="cleanslate" id="sidebar" show="{{showSidebar}}" connected="{{connected}}" socket-id="socketio" bid="[[bid]]" convo="[[convo]]" visitor="[[visitor]]" jwt-token="[[jwtToken]]" new-message-counter="{{newMessageCounter}}" new-message="{{newMessage}}" in-message="{{inMessage}}" training="{{training}}" show-console="{{showConsole}}" dharma="{{dharma}}"></convospot-sidebar>
         <overlay-tour></overlay-tour>
         <overlay-highlight></overlay-highlight>
-        <train-console show="{{showConsole}}"></train-console>
+        <train-console show="{{showConsole}}" dharma="{{dharma}}"></train-console>
     </template>
 </dom-module>
 <script>
@@ -124,6 +127,44 @@ Polymer({
             value: false,
             notify: true
         },
+        dharma: {
+            type: Object,
+            value: {
+                "start_time": "2008-09-15T15:53:00+05:00",
+                "context": [{
+                        "key": "name",
+                        "label": "Name",
+                        "value": "Homer Quan",
+                        "iri": "http://schema.org/name"
+                    },
+                    {
+                        "key": "job_level",
+                        "label": "Job level",
+                        "value": 3
+                    }
+                ],
+                "experience": [{
+                    "id": "94a92b1f-e1c7-44ec-bcb3-957afc55b605",
+                    "name": "prescreen conversation",
+                    "type": "convsospot/smartconvo",
+                    "trigger": "init",
+                    "status": "uncomplete",
+                    "steps": [{
+                            "type": "Number",
+                            "ui:widget": "range",
+                            "text": "sample question 1"
+                        },
+                        {
+                            "type": "String",
+                            "ui:widget": "text",
+                            "text": "sample question 2"
+                        }
+                    ],
+                    "style": 3
+                }]
+            },
+            notify: true
+        }
     },
 
     /**
@@ -187,7 +228,7 @@ Polymer({
                 if (data && data.event === "change_training") {
                     console.log(data);
                     this.training = data.payload;
-                    if(this.training) {
+                    if (this.training) {
                         this.showConsole = true;
                     }
                 }
@@ -196,11 +237,15 @@ Polymer({
                     this.showConsole = data.payload;
                 }
             }.bind(this));
+            PubSub.subscribe('demo1', function(topic, data) {
+                this.showSidebar = !this.showSidebar;
+            }.bind(this));
         }
     },
 
     toggleSidebar: function() {
-        this.showSidebar = !this.showSidebar;
+        // New Experience
+        // this.showSidebar = !this.showSidebar;
     },
 
     /**

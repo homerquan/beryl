@@ -26,14 +26,15 @@
     "iron-scroll-threshold": "^1.0.2",
     "polymer-scroll-threshold": "*",
     "iron-icons": "^2.0.1",
-    "tether": "^1.4.4"
+    "tether": "^1.4.4",
+    "paper-stepper": "Zecat/paper-stepper#^1.1.0"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"
   },
   "ignore": [],
   "resolutions": {
-    "iron-icons": "^1.0.0",
+    "iron-icons": "~1.1.1",
     "polymer": "^1.6.1",
     "iron-a11y-keys": "^1.0.0",
     "iron-ajax": "^1.0.0",

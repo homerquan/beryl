@@ -28,7 +28,6 @@ The full starter kit requires the following major dependencies:
 ```sh
 node --version
 ```
-
 The version should be at or above 8.x.x
 
 2)  If you don't have Node.js installed
@@ -134,7 +133,7 @@ Polymer uses [Bower](http://bower.io) for package management. This makes it easy
 Components installed by Bower live in the `app/bower_components` directory. This location is specified by the `.bowerrc` file. Many projects which follow Yeoman conventions place the `bower_components` directory outside of the `app` directory and then mount it using a server. This causes problems for tools like [Vulcanize](https://github.com/polymer/vulcanize) and [web-component-shards](https://github.com/PolymerLabs/web-component-shards) which rely on relative paths. We've chosen to simplify things and have `bower_components` live inside of `app` to resolve these issues.
 
 ## Deploy
-
+TBD
 
 ## Licensing
 

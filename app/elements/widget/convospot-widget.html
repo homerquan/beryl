@@ -16,8 +16,6 @@
             /*z-index: 10000;*/
             @apply(--layout);
             @apply(--layout-vertical);
-            overflow-x: hidden;
-            overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             --color-one: #3d3d3d;
             --color-two: #9b4dca;
@@ -162,18 +160,6 @@
             opacity: 1;
         }
 
-        .training-box {
-            position: absolute;
-            bottom: 0;
-            font-size: 0.65rem;
-            background: #9013FE;
-            padding: 3px;
-            line-height: 0.5rem;
-            font-weight: bolder;
-            color: white;
-            border-radius: 7px;
-            right: 7px;
-        }
         </style>
         <div>
             <div class$="glow-border glow-{{thinking}}">
@@ -185,9 +171,6 @@
         <template is="dom-if" if="{{badge}}">
             <paper-badge label="{{badge}}" role="status" aria-label="{{badge}}">
             </paper-badge>
-        </template>
-        <template is="dom-if" if="{{training}}">
-            <div class="training-box">Learning</div>
         </template>
     </template>
     <script>
@@ -217,17 +200,12 @@
                     type: Boolean,
                     value: false,
                     notify: true
-                },
-                thinking: {
-                    type: Boolean,
-                    value: false,
-                    notify: true
-                },
-                training: {
-                    type: Boolean,
-                    value: false,
-                    notify: true
-                },
+               },
+               thinking: {
+                   type: Boolean,
+                   value: false,
+                   notify: true
+               },
             },
             _getMessage: function(counter) {
                 if (counter > 0) {

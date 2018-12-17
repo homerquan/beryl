@@ -7,6 +7,8 @@
 <link rel="import" href="../../styles/custom-styles.html">
 <link rel="import" href="../../styles/share-styles.html">
 <link rel="import" href="../core/cache.html">
+<link rel="import" href="../core/base.html">
+<link rel="import" href="../core/dharma.html">
 <dom-module id="train-console">
     <style include="custom-styles"></style>
     <style include="share-styles"></style>
@@ -14,26 +16,25 @@
     .console-container {
         bottom: 0px;
         left: 0px;
-        right: 0px;
+        top: 0px;
         position: fixed;
-        border-top: solid 1px black;
+        border-right: solid 1px #eee;
         z-index: 9999;
         background: white;
-        height: 200px;
-        width: calc(100% - 40px);
+        width: 400px;
         padding: 15px 20px;
     }
 
     .console-control {
         position: absolute;
-        top: -35px;
-        left: 0;
+        right: -40px;
+        background: #eee;
     }
 
     .open-true {}
 
     .open-false {
-        bottom: -230px;
+        left: -440px;
     }
 
     .show-demo-false {
@@ -59,26 +60,27 @@
             </div>
             <div class$="console-container open-{{open}}">
                 <div class="console-control">
-                    <paper-icon-button icon="icons:expand-more" on-tap="_toggle" class="primary">Close</paper-icon-button>
+                    <paper-icon-button icon="icons:settings" on-tap="_toggle" class="primary">Close</paper-icon-button>
                 </div>
                 <div>
                     <paper-tabs selected="{{selected}}" scrollable>
                         <paper-tab>Experience</paper-tab>
-                        <paper-tab>Add new one</paper-tab>
+                        <paper-tab>Context</paper-tab>
                     </paper-tabs>
                     <iron-pages selected="{{selected}}">
                         <div>
                             <ul>
-                                <li>Show smart form job_referral to anyone [edit]</li>
-                                <li>Show overlay smart conversation pre_screen to anyone [edit]</li>
-                                <li>Skip questions on smartconvo for level 4 and above [edit]</li>
+                                <template is="dom-repeat" items="{{experience}}">
+                                    <li>{{item.name}}</li>
+                                </template>
                             </ul>
                         </div>
                         <div>
-                            <div class="square_option" on-tap="_add_smart_form">Form</div>
-                            <div class="square_option" on-tap="_add_smart_convo">Conversation</div>
-                            <div class="square_option">Template</div>
-                            <div class="square_option">Notification</div>
+                            <ul>
+                                <template is="dom-repeat" items="{{context}}">
+                                    <li>{{item.label}} - {{item.value}}</li>
+                                </template>
+                            </ul>
                         </div>
                     </iron-pages>
                 </div>
@@ -93,7 +95,8 @@
         is: 'train-console',
         behaviors: [
             Spinel.Base,
-            Spinel.Cache
+            Spinel.Cache,
+            Spinel.Dharma
         ],
         listeners: {},
         properties: {
@@ -121,7 +124,7 @@
             ignore: {
                 type: Boolean,
                 value: false
-            }
+            },
         },
         ready: function() {
             if (Spinel.getConfig('debugMode')) {

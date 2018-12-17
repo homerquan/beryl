@@ -11,11 +11,12 @@
     .widget-message {
         height: 40px;
         min-width: 100px;
-        background: #eee;
+        background: #333;
         position: fixed;
         bottom: 22px;
-        right: 22px;
-        border-radius: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 15px;
         -webkit-box-shadow: 0px 2px 0px 1px rgba(0, 0, 0, 0.35);
         -moz-box-shadow: 0px 2px 0px 1px rgba(0, 0, 0, 0.35);
         box-shadow: 0px 2px 0px 1px rgba(0, 0, 0, 0.35);
@@ -23,7 +24,7 @@
     }
     
     .message-text {
-        color: #424242;
+        color: white;
         padding: 12px 15px 10px 15px;
         margin-right: 30px;
         max-width: 200px;
@@ -37,7 +38,7 @@
     </style>
     <template>
         <template is="dom-if" if="{{newMessage}}">
-            <div class="widget-message animated fadeIn">
+            <div class="widget-message animated bounceInBottom">
                 <div class="message-text">
                     {{newMessage.text}}
                 </div>
