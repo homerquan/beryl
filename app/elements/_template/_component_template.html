@@ -1,0 +1,42 @@
+<!-- this is the entry point for selected card -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<link rel="import" href="../core/cache.html">
+<dom-module id="<change name here>">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <style>
+        
+    </style>
+    <template>
+        <template is="dom-if" if="{{training}}">
+            <div class="training-box">
+                <paper-icon-button icon="icons:apps"></paper-icon-button>
+            </div>
+
+        </template>
+    </template>
+</dom-module>
+<script>
+(function() {
+    'use strict';
+    Polymer({
+        is: '<change name here>',
+        behaviors: [
+            Spinel.Base,
+            Spinel.Cache
+        ],
+        listeners: {},
+        properties: {
+                something: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                },
+        }
+    });
+})();
+</script>

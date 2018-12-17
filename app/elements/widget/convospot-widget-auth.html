@@ -1,0 +1,63 @@
+<!-- this is the entry point for selected card -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<link rel="import" href="../core/cache.html">
+<link rel="import" href="./convospot-widget-experience.html">
+<dom-module id="convospot-widget-auth">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <style>
+        .training-box {
+            position: fixed;
+            bottom: 18px;   
+            padding: 3px;
+            font-weight: bolder;
+            color: rgba(0,0,0,0.87);
+            right: 65px;
+        }
+    </style>
+    <template>
+        <template is="dom-if" if="{{training}}">
+            <div class="training-box">
+                 <paper-icon-button icon="icons:save" on-tap="_save"></paper-icon-button>
+                <paper-icon-button icon="icons:apps" on-tap="_toggle"></paper-icon-button>
+            </div>
+            <convospot-widget-experience open="{{open}}"></convospot-widget-experience>
+            <!-- demo only -->
+        </template>
+    </template>
+</dom-module>
+<script>
+(function() {
+    'use strict';
+    Polymer({
+        is: 'convospot-widget-auth',
+        behaviors: [
+            Spinel.Base,
+            Spinel.Cache
+        ],
+        listeners: {},
+        properties: {
+                training: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                },
+                open: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                }
+        },
+        _toggle: function() {
+            this.open = !this.open;
+        },
+        _save: function() {
+            this.training = false;
+        },
+    });
+})();
+</script>

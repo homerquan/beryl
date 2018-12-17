@@ -1,0 +1,41 @@
+<!-- To show welcome -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<link rel="import" href="../core/base.html">
+<dom-module id="convospot-sidebar-footer">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <style>
+      .footer {
+            color: white;
+            font-size: 10px;
+            height: 10px;
+            text-align: right;
+            font-weight: 100;
+            background: #443266;
+        }
+    </style>
+    <template>
+        <template is="dom-if" if="{{show}}">
+            <img src="welcome.png"></img>
+        </template>
+    </template>
+</dom-module>
+<script>
+(function() {
+    'use strict';
+    Polymer({
+        is: 'convospot-sidebar-footer',
+        behaviors: [Spinel.Base],
+        listeners: {},
+        properties: {
+            show: {
+                type: Boolean,
+                notify: true,
+                value: true
+            }
+        }
+    });
+})();
+</script>

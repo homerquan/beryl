@@ -1,0 +1,42 @@
+<script>
+
+var Spinel = Spinel || {};
+
+
+Spinel.Dharma = {
+    properties: {
+        dharma: {
+                type: Object,
+                value: null,
+                notify: true
+        },
+        experience: {
+            type: Array,
+            computed: '_getExperience(dharma)'
+        },
+        context: {
+            type: Array,
+            computed: '_getContext(dharma)'
+        },
+        // TODO: demo only
+        steps: {
+            type: Array,
+            computed: '_getSteps(dharma)'
+        },
+    },
+
+    _getExperience: dharma => {
+        return dharma.experience;
+    },
+
+    _getContext: dharma => {
+        return dharma.context;
+    },
+
+    _getSteps: dharma => {
+        return dharma.experience[0].steps;
+    },
+
+    
+}
+</script>

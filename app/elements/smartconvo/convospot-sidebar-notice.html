@@ -1,0 +1,106 @@
+<!-- To show notice or error -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<link rel="import" href="../core/base.html">
+<dom-module id="convospot-sidebar-notice">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <style>
+    paper-card {
+        width: 100%;
+    }
+    
+    .notice-container {
+        background: var(--paper-light-blue-300);
+        padding: 5px;
+        position: relative;
+        color: white;
+        text-align: center;
+        font-size: 14px;
+    }
+    
+    .notice-container.level-error {
+        background: var(--convospot-error-bg-color);
+    }
+    
+    paper-icon-button.control {
+        position: absolute;
+        top: 4px;
+        right: 0;
+    }
+    </style>
+    <template>
+        <template is="dom-if" if="{{show}}">
+            <div class="top-container">
+                <paper-card>
+                    <div class$="notice-container level-{{notice.level}}">
+                        <span class="text">
+                        {{notice.text}}
+                        </span>
+                        <template is="dom-if" if="{{notice.showSpinner}}">
+                            <div class="spinner">
+                                <div class="bounce1"></div>
+                                <div class="bounce2"></div>
+                                <div class="bounce3"></div>
+                            </div>
+                        </template>
+                        <template is="dom-if" if="{{notice.action}}">
+                            <paper-button class="small" on-tap="_takeAction">{{notice.action.label}}</paper-button>
+                        </template>
+                        <template is="dom-if" if="{{!notice.disableClose}}">
+                            <paper-button class="small" on-tap="_close">Close</paper-button>
+                        </template>
+                    </div>
+                </paper-card>
+            </div>
+        </template>
+    </template>
+</dom-module>
+<script>
+(function() {
+    'use strict';
+    Polymer({
+        is: 'convospot-sidebar-notice',
+        behaviors: [Spinel.Base],
+        listeners: {},
+        properties: {
+            notice: {
+                type: Object,
+                notify: true,
+                value: {}
+            },
+            show: {
+                type: Boolean,
+                notify: true,
+                value: false
+            }
+        },
+
+        ready: function() {
+            PubSub.subscribe('convospot-widget-notice', function(msg, data) {
+                // first check if its a cancel command
+                if (data.cancel && _.includes(data.codes, this.notice.code)) {
+                    this.show = false;
+                } else if (data && !data.cancel) {
+                    this.notice = data;
+                    this.show = true;
+                }
+            }.bind(this));
+        },
+
+        _close: function() {
+            this.show = false;
+        },
+
+        _takeAction: function() {
+            if (this.notice.action &&
+                typeof this.notice.action.process === "function")
+                this.notice.action.process();
+        }
+    });
+})();
+</script>

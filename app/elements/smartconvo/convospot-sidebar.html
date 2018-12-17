@@ -1,0 +1,317 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../styles/custom-styles.html">
+<link rel="import" href="../../styles/share-styles.html">
+<link rel="import" href="./convospot-sidebar-notice.html">
+<link rel="import" href="./convospot-sidebar-welcome.html">
+<link rel="import" href="./convospot-sidebar-input.html">
+<link rel="import" href="./convospot-sidebar-footer.html">
+<link rel="import" href="../convo/convospot-convo-input.html">
+<link rel="import" href="../convo/convospot-convo-model.html">
+<link rel="import" href="../convo/convospot-convo-view.html">
+<link rel="import" href="../core/cache.html">
+<link rel="import" href="../core/base.html">
+<link rel="import" href="../core/dharma.html">
+<dom-module id="convospot-sidebar">
+    <style include="custom-styles"></style>
+    <style include="share-styles"></style>
+    <template>
+        <style>
+        :host {
+            --paper-toolbar-height: 52px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        paper-toolbar {
+            background: var(--convospot-bg-color);
+        }
+
+        .sidebar-container {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            bottom: 0;
+            transform: translateX(-50%);
+            background: var(--convospot-bg-color);
+            border-left: 1px solid #dadee2;
+            box-shadow: 0 0 4px 1px rgba(0, 0, 0, .08);
+            z-index: 9999;
+        }
+
+        paper-card {
+            box-shadow: none;
+            border: solid 1px #70b1e7;
+            border-radius: 6px;
+            margin: 0 2px;
+        }
+
+        paper-toast {
+            margin-top: 52px;
+            top: 0px;
+            width: 100%;
+            min-width: 0;
+            max-height: 40px;
+            border-radius: 0;
+            margin: 0;
+        }
+
+        @media (max-width: 460px) {
+            .sidebar-container {
+                width: auto;
+                left: 0;
+            }
+        }
+
+        convospot-convo-view {
+            margin-bottom: 52px;
+        }
+
+        .bottom-helper {
+            background: white;
+            width: 100%;
+            position: absolute;
+            bottom: 0px;
+        }
+
+        .big {
+            height: 45px;
+            width: 45px;
+        }
+
+        .power {
+            position: absolute;
+            bottom: 0;
+            right: 4px;
+            font-size: 10px;
+        }
+
+        .training-box {
+            position: absolute;
+            top: 2px;
+            font-size: 0.8rem;
+            background: #9013FE;
+            padding: 0px;
+            line-height: 0.5rem;
+            font-weight: bolder;
+            color: white;
+            border-radius: 7px;
+            right: 2px;
+            padding-left: 10px;
+        }
+        </style>
+        <div id="sidebarContainer" class$="sidebar-container animated bounceInRight show-{{show}}">
+            <div>
+                <template is="dom-if" if="{{training}}">
+                    <div class="training-box">Learning
+                        <paper-icon-button icon="icons:view-list" on-tap="_toggleConsole" style="color: white;"></paper-icon-button>
+                    </div>
+                </template>
+                <paper-icon-button icon="icons:clear" on-tap="closeSidebar" class="primary big close"></paper-icon-button>
+            </div>
+            <convospot-sidebar-notice></convospot-sidebar-notice>
+            <convospot-sidebar-welcome show="[[!messages.length]]" dharma="{{dharma}}"></convospot-sidebar-welcome>
+            <convospot-convo-model id="convModel" items="{{messages}}" convo="[[convo]]"></convospot-convo-model>
+            <convospot-convo-view id="convView" model-id="convModel" items="{{messages}}" cid="[[cid]]"></convospot-convo-view>
+            <div class="bottom-helper">
+                <convospot-sidebar-input connected="[[connected]]" convo="[[convo]]" visitor="[[visitor]]" jwt-token="[[jwtToken]]" on-message-send="_sendMessage"></convospot-sidebar-input>
+                <!-- <convospot-convo-input id="convoInput" model-id="convModel" message="{{inMessage}}" on-send="sendMessage" cid="[[cid]]"></convospot-convo-input> -->
+                <div class="power">Power by Reflen</div>
+            </div>
+        </div>
+    </template>
+    <script>
+    (function() {
+        'use strict';
+
+        Polymer({
+            is: 'convospot-sidebar',
+            behaviors: [
+                Spinel.Base,
+                Spinel.Ajax,
+                Spinel.Config,
+                Spinel.Dharma
+            ],
+            properties: {
+                socketId: {
+                    type: String
+                },
+                connected: {
+                    type: Boolean,
+                    value: false,
+                    notify: true,
+                    observer: '_connectedChanged'
+                },
+                error: {
+                    type: Object,
+                    value: null,
+                    notify: true
+                },
+                author: {
+                    type: String,
+                    value: '',
+                    notify: false
+                },
+                messages: {
+                    type: Array,
+                    value: [],
+                    notify: true
+                },
+                newMessage: {
+                    type: Object,
+                    value: null,
+                    notify: true
+                },
+                newMessageCounter: {
+                    type: Number,
+                    value: 0,
+                    notify: true
+                },
+                training: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                },
+                show: {
+                    type: Boolean,
+                    value: false,
+                    notify: true,
+                    observer: '_showChanged'
+                },
+                inMessage: {
+                    observer: '_actMessage'
+                },
+                showConsole: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                },
+            },
+
+            attached: function() {
+                this.socket = document.querySelector('#' + this.socketId);
+                // TODO: quick demo remove later
+                if(this.experience && this.experience.length>0 && this.experience[0].trigger === 'init'){
+                    this.show = true;
+                    this._actMessage({data:{type:"action"}});
+                };
+            },
+            ready: function() {
+
+            },
+            closeSidebar: function() {
+                this.show = false;
+            },
+
+            // receiveSaveMessage: function(msg) {
+            //     if (msg) {
+            //         this.$.convModel.newItem(msg);
+            //         //add new message counter
+            //         if (this.show === false) {
+            //             this.newMessageCounter = this.newMessageCounter + 1;
+            //             this.newMessage = msg;
+            //         }
+            //     } else {
+            //         console.error("invalid message");
+            //     }
+            // },
+            receiveRemoveMessage: function(msg) {
+                if (msg) {
+                    this.$.convModel.destroyItemById(msg.id);
+                } else {
+                    console.error("invalid message");
+                }
+            },
+            reset: function() {
+                this.messages = [];
+            },
+            _showChanged: function(show) {
+                if (show) {
+                    this.newMessageCounter = 0;
+                    this.newMessage = null;
+                }
+            },
+            _connectedChanged: function(newVal, oldVal) {
+                if (!newVal && oldVal) {
+                    PubSub.publish('convospot-widget-notice', {
+                        level: 'error',
+                        code: 'DISCONNECTED',
+                        text: 'Disconnected, try reconnecting',
+                        showSpinner: true,
+                        disableClose: true
+                    });
+                } else if (newVal && oldVal === false) {
+                    PubSub.publish('convospot-widget-notice', {
+                        codes: ['DISCONNECTED', 'RECONNECT_FAILED'],
+                        cancel: 'true'
+                    });
+                }
+            },
+            /**
+             * Handles the POST response, stores the convoId.
+             */
+            _postResponse: function(data) {
+                this.$.convView.keepBottom();
+                //confirm sends
+            },
+            _sendMessage: function(event, msg) {
+                if (msg) {
+                    // add for ack send success
+                    msg.acknowledged = true; //TODO: add confirm later
+                    msg.source = 'visitor';
+                    msg.sourceId = this.visitor;
+                    msg.conversation = this.convo;
+                    this.$.convModel.newItem(msg);
+                    this.$.convView.keepBottom();
+                    //add new message counter
+                    if (this.show === false) {
+                        this.newMessageCounter = this.newMessageCounter + 1;
+                        this.newMessage = msg;
+                    }
+                } else {
+                    console.error("invalid message");
+                }
+            },
+
+            _actMessage: function(msg) {
+                console.log(msg);
+                if (msg && msg.event === 'create_message') {
+                    if (msg.data && msg.data.id && msg.data.modelName === 'message') {
+                        if (msg.data.source === 'visitor')
+                            this.$.convModel.acknowledgeCreate(msg.data.id);
+                        else {
+                            //add new message counter
+                            if (this.show === false) {
+                                this.newMessageCounter = this.newMessageCounter + 1;
+                                this.newMessage = msg.data;
+                            }
+                            msg.data.acknowledged = true;
+                            this.$.convModel.newItem(msg.data);
+
+                            this.$.convView.showSpinner = false;
+
+                            PubSub.subscribe('convo-item-attached', function() {
+                                //this.$.convView.showSpinner = false;
+                            }.bind(this));
+                        }
+                    }
+                }
+                if (msg && msg.event === 'start_ask_engine') {
+                    this.$.convView.showSpinner = true;
+                }
+                // if (msg && msg.event === 'message:save:' + this.cid) {
+                //     this.$.sidebar.receiveSaveMessage(msg.data);
+                // }
+                // if (msg && msg.event === 'message:remove:' + this.cid) {
+                //     this.$.sidebar.receiveRemoveMessage(msg.data);
+                // }
+            },
+
+            _toggleConsole: function() {
+                this.showConsole = !this.showConsole;
+            },
+        });
+    })();
+    </script>
+</dom-module>
