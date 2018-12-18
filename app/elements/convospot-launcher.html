@@ -237,9 +237,20 @@ Polymer({
                     this.showConsole = data.payload;
                 }
             }.bind(this));
-            PubSub.subscribe('demo1', function(topic, data) {
-                this.showSidebar = !this.showSidebar;
+            // TODO: demo only
+            PubSub.subscribe('mock_context', function(topic, data) {
+                console.log(data);
+                this.dharma.context[1].value=data.value;
+                Spinel.Cache.setItem('demo_dharma', JSON.stringify(this.dharma));
             }.bind(this));
+        }
+
+        //TODO: demo only
+        var storedDharma = Spinel.Cache.getItem('demo_dharma');
+        if(!storedDharma) {
+           Spinel.Cache.setItem('demo_dharma', JSON.stringify(this.dharma));
+        } else {
+            this.dharma = JSON.parse(storedDharma);
         }
     },
 

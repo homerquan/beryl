@@ -2,6 +2,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../../styles/custom-styles.html">
 <link rel="import" href="../../styles/share-styles.html">
 <link rel="import" href="../core/cache.html">
@@ -9,28 +10,42 @@
     <style include="custom-styles"></style>
     <style include="share-styles"></style>
     <style>
-        .container {
-            position: fixed;
-            bottom: 60px;
-            padding: 3px;
-            line-height: 0.5rem;
-            font-weight: bolder;
-            color: rgba(0,0,0,0.87);
-            right: 45px;
-            /*border-radius: 5px;
+    .container {
+        position: fixed;
+        bottom: 60px;
+        padding: 3px;
+        line-height: 0.5rem;
+        font-weight: bolder;
+        color: rgba(0, 0, 0, 0.87);
+        right: 45px;
+        /*border-radius: 5px;
             -webkit-box-shadow: 0 2px 10px rgba(0,0,0,.2);
             box-shadow: 0 2px 10px rgba(0,0,0,.2);
             border: 1px solid #ccc;
             border-color: rgba(0,0,0,.2);
             color: #000;*/
-        }
+    }
+
+    .editor {
+        position: fixed;
+        left: 40px;
+        top: 100px;
+        background: #eee;
+        width: 400px;
+        height: 550px;
+    }
     </style>
     <template>
         <template is="dom-if" if="{{open}}">
             <div class="container">
                 <img class="avatar" style="height: 400px;" src="../../images/mock/widget-experience.png" on-tap="_demo"></img>
             </div>
-
+        </template>
+        <template is="dom-if" if="{{demoEditing}}">
+            <div class="editor">
+                <paper-textarea id="messageInput" class="input-area" max-rows="20" value="{{content}}" placeholder="DEMO UI editing by changing JSON schema" no-label-float="true" autofocus focused char-counter></paper-textarea>
+                <paper-icon-button icon="icons:save" on-tap="_save" class="primary">save</paper-icon-button>
+            </div>
         </template>
     </template>
 </dom-module>
@@ -45,14 +60,28 @@
         ],
         listeners: {},
         properties: {
-                open: {
-                    type: Boolean,
-                    value: false,
-                    notify: true
-                },
+            content: {
+                type: String,
+                value: Spinel.Cache.getItem('demo_dharma'),
+                notify: true
+            },
+            open: {
+                type: Boolean,
+                value: false,
+                notify: true
+            },
+            demoEditing: {
+                type: Boolean,
+                value: false,
+                notify: true
+            },
         },
         _demo: function() {
-            PubSub.publish('demo1', {});
+            this.demoEditing = !this.demoEditing;
+        },
+        _save: function() {
+            Spinel.Cache.setItem('demo_dharma', this.content);
+            this.demoEditing = false;
         }
     });
 })();
